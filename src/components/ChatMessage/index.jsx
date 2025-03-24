@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import {
   Container,
-  ReactionTriggerArea,
+  ReactionWrapper,
   Bubble,
   Text,
   Media,
@@ -14,9 +14,11 @@ import { doc, updateDoc } from "firebase/firestore";
 const ChatMessage = ({ msg, isSender, conversationId }) => {
   if (!msg) return null;
 
-  const { text = "", type = "text", mediaUrl = "", read, reaction } = msg;
+  const { id, text = "", type = "text", mediaUrl = "", read, reaction } = msg;
   const [showReactions, setShowReactions] = useState(false);
   const menuRef = useRef(null);
+  const bubbleRef = useRef(null);
+  const [menuStyle, setMenuStyle] = useState({});
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -30,13 +32,19 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
 
   const handleOpenMenu = (e) => {
     e.preventDefault();
-    setShowReactions(true);
+    if (bubbleRef.current) {
+      const rect = bubbleRef.current.getBoundingClientRect();
+      const rightSpace = window.innerWidth - rect.right;
+
+      setMenuStyle(rightSpace < 150 ? { right: 0 } : { left: 0 });
+      setShowReactions(true);
+    }
   };
 
   const handleSelectReaction = async (emoji) => {
     setShowReactions(false);
     try {
-      const messageRef = doc(db, "conversations", conversationId, "messages", msg.id);
+      const messageRef = doc(db, "conversations", conversationId, "messages", id);
       await updateDoc(messageRef, { reaction: emoji });
     } catch (err) {
       console.error("Erro ao salvar reação:", err);
@@ -45,8 +53,7 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
 
   const renderText = (text) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = text.split(urlRegex);
-    return parts.map((part, i) =>
+    return text.split(urlRegex).map((part, i) =>
       urlRegex.test(part) ? (
         <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
       ) : (
@@ -57,9 +64,15 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
 
   return (
     <Container $isSender={isSender}>
-      <ReactionTriggerArea onContextMenu={handleOpenMenu} onTouchStart={handleOpenMenu}>
-      <Bubble $isSender={isSender} $hasReaction={!!reaction}>
-          {type === "text" && <Text>{renderText(text)}</Text>}
+      <ReactionWrapper>
+        <Bubble
+          ref={bubbleRef}
+          $isSender={isSender}
+          onContextMenu={handleOpenMenu}
+          onTouchStart={handleOpenMenu}
+        >
+          {type === "text" && !!text && <Text>{renderText(text)}</Text>}
+
           {type === "image" && mediaUrl && (
             <Media><img src={mediaUrl} alt="imagem" /></Media>
           )}
@@ -69,21 +82,24 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
           {type === "video" && mediaUrl && (
             <Media><video controls src={mediaUrl} width="250" /></Media>
           )}
+
           {isSender && read && (
             <small style={{ fontSize: "0.7rem", opacity: 0.7 }}>✔✔ Lido</small>
           )}
         </Bubble>
 
-        {reaction && <ReactionBubble $isSender={isSender}>{reaction}</ReactionBubble>}
+        {reaction && (
+          <ReactionBubble $isSender={isSender}>{reaction}</ReactionBubble>
+        )}
 
         {showReactions && (
-          <ReactionMenu ref={menuRef}>
+          <ReactionMenu ref={menuRef} style={menuStyle}>
             {["👍", "❤️", "😂", "😮", "😢"].map((emoji) => (
               <span key={emoji} onClick={() => handleSelectReaction(emoji)}>{emoji}</span>
             ))}
           </ReactionMenu>
         )}
-      </ReactionTriggerArea>
+      </ReactionWrapper>
     </Container>
   );
 };

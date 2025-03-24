@@ -1,25 +1,17 @@
-import styled, { keyframes } from "styled-components";
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+import styled from "styled-components";
 
 export const Container = styled.div`
   display: flex;
   justify-content: ${({ $isSender }) => ($isSender ? "flex-end" : "flex-start")};
-  margin: 0.4rem 0;
-  animation: ${fadeIn} 0.25s ease;
+  padding: 0.25rem 1rem;
 `;
 
-export const ReactionTriggerArea = styled.div`
+export const BubbleWrapper = styled.div`
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: ${({ $isSender }) => ($isSender ? "flex-end" : "flex-start")};
+  max-width: 100%;
 `;
 
 export const Bubble = styled.div`
@@ -30,17 +22,16 @@ export const Bubble = styled.div`
   border-radius: 16px;
   border-bottom-right-radius: ${({ $isSender }) => ($isSender ? "4px" : "16px")};
   border-bottom-left-radius: ${({ $isSender }) => ($isSender ? "16px" : "4px")};
-  max-width: 80%;
-  min-width: 100px;
+  max-width: 600px;
+  min-width: 80px;
   width: fit-content;
-  white-space: pre-wrap;
+  word-wrap: break-word;
   word-break: break-word;
-  overflow-wrap: break-word;
-  font-size: 1rem;
+  white-space: pre-wrap;
   line-height: 1.5;
-  position: relative;
-  margin-bottom: ${({ $hasReaction }) => ($hasReaction ? "0" : "-15px")};
+  font-size: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
 
   a {
     color: ${({ theme }) => theme.accent};
@@ -49,19 +40,54 @@ export const Bubble = styled.div`
   }
 `;
 
+export const ReactionBubble = styled.div`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: ${({ $isSender }) => ($isSender ? "-1.6rem" : "unset")};
+  left: ${({ $isSender }) => ($isSender ? "unset" : "-1.6rem")};
+  background: ${({ theme }) => theme.surface};
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+`;
 
+export const ReactionMenu = styled.div`
+  position: absolute;
+  bottom: 110%;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  background: ${({ theme }) => theme.surface};
+  padding: 0.4rem 0.6rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+
+  span {
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+`;
 
 export const Text = styled.span`
   display: block;
 `;
 
 export const Media = styled.div`
+  margin-top: 0.5rem;
+
   img,
   video,
   audio {
     max-width: 100%;
     border-radius: 12px;
-    margin-top: 0.5rem;
   }
 
   audio {
@@ -69,38 +95,10 @@ export const Media = styled.div`
   }
 `;
 
-export const ReactionMenu = styled.div`
-  position: absolute;
-  bottom: 110%;
-  left: 0;
+export const ReactionWrapper = styled.div`
+  position: relative;
   display: flex;
-  gap: 0.4rem;
-  background: ${({ theme }) => theme.surface};
-  padding: 0.4rem 0.6rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 99;
-
-  span {
-    font-size: 1.4rem;
-    cursor: pointer;
-    transition: transform 0.2s;
-
-    &:hover {
-      transform: scale(1.2);
-    }
-  }
-`;
-
-export const ReactionBubble = styled.div`
-  position: absolute;
-  bottom: -1.2rem;
-  right: ${({ $isSender }) => ($isSender ? "8px" : "unset")};
-  left: ${({ $isSender }) => ($isSender ? "unset" : "8px")};
-  background: ${({ theme }) => theme.surface};
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  z-index: 1;
+  flex-direction: column;
+  align-items: ${({ $isSender }) => ($isSender ? "flex-end" : "flex-start")};
+  max-width: 100%;
 `;

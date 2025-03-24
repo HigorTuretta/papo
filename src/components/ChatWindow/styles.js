@@ -46,9 +46,40 @@ export const Messages = styled.div`
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   background: ${({ theme }) => theme.background};
+  scroll-behavior: smooth;
+
+  &::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, ${({ theme }) => theme.background} 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
 `;
+
+export const DateSeparator = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: ${({ theme }) => theme.secondary};
+  background: ${({ theme }) => theme.surfaceTransparent};
+  backdrop-filter: blur(6px);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  margin: 0 auto 0.5rem;
+  width: fit-content;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  pointer-events: none;
+`;
+
+
+
 
 export const InputArea = styled.form`
   display: flex;

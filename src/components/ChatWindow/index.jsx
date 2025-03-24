@@ -9,6 +9,7 @@ import {
   ContactName,
   ContactInfo,
   ContactAvatar,
+  DateSeparator
 } from "./styles";
 import { db } from "../../services/firebase";
 import {
@@ -24,6 +25,11 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { FaPaperPlane } from "react-icons/fa";
 import ChatMessage from "../ChatMessage";
+import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
+import isYesterday from "dayjs/plugin/isYesterday";
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 const ChatWindow = ({ contact }) => {
   const { user } = useAuth();
@@ -77,11 +83,29 @@ const ChatWindow = ({ contact }) => {
       text: message,
       createdAt: serverTimestamp(),
       read: false,
-      reaction: "", // inicializa o campo
     });
 
     setMessage("");
   };
+
+  const formatDate = (timestamp) => {
+    const date = dayjs(timestamp?.toDate());
+    if (date.isToday()) return "Hoje";
+    if (date.isYesterday()) return "Ontem";
+    return date.format("DD [de] MMMM [de] YYYY");
+  };
+
+  const groupMessagesByDate = (messages) => {
+    const grouped = {};
+    messages.forEach((msg) => {
+      const key = dayjs(msg.createdAt?.toDate()).format("YYYY-MM-DD");
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(msg);
+    });
+    return grouped;
+  };
+
+  const groupedMessages = groupMessagesByDate(messages);
 
   return (
     <Container>
@@ -94,13 +118,18 @@ const ChatWindow = ({ contact }) => {
       </Header>
 
       <Messages ref={messagesRef}>
-        {messages.map((msg) => (
-          <ChatMessage
-            key={msg.id}
-            msg={msg}
-            isSender={msg.from === user.uid}
-            conversationId={conversationId}
-          />
+        {Object.keys(groupedMessages).map((dateKey) => (
+          <div key={dateKey}>
+            <DateSeparator>{formatDate(dayjs(dateKey))}</DateSeparator>
+            {groupedMessages[dateKey].map((msg) => (
+              <ChatMessage
+                key={msg.id}
+                msg={msg}
+                isSender={msg.from === user.uid}
+                conversationId={conversationId}
+              />
+            ))}
+          </div>
         ))}
       </Messages>
 
