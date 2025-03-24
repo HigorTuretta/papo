@@ -118,3 +118,9 @@ export const SendButton = styled.button`
     background: ${({ theme }) => theme.accent};
   }
 `;
+
+export const SeparatorWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+`;

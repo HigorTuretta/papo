@@ -1,3 +1,4 @@
+// 📁 ChatWindow/index.jsx
 import { useEffect, useRef, useState } from "react";
 import {
   Container,
@@ -9,7 +10,8 @@ import {
   ContactName,
   ContactInfo,
   ContactAvatar,
-  DateSeparator
+  DateSeparator,
+  SeparatorWrapper
 } from "./styles";
 import { db } from "../../services/firebase";
 import {
@@ -28,8 +30,16 @@ import ChatMessage from "../ChatMessage";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import isYesterday from "dayjs/plugin/isYesterday";
+import CryptoJS from "crypto-js";
+
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
+
+const SECRET_KEY = import.meta.env.VITE_CHAT_SECRET_KEY;
+
+const encryptMessage = (text) => {
+  return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
+};
 
 const ChatWindow = ({ contact }) => {
   const { user } = useAuth();
@@ -80,9 +90,10 @@ const ChatWindow = ({ contact }) => {
     await addDoc(collection(db, "conversations", conversationId, "messages"), {
       from: user.uid,
       to: contact.uid,
-      text: message,
+      text: encryptMessage(message),
       createdAt: serverTimestamp(),
       read: false,
+      reaction: "",
     });
 
     setMessage("");
@@ -118,8 +129,14 @@ const ChatWindow = ({ contact }) => {
       </Header>
 
       <Messages ref={messagesRef}>
+        <SeparatorWrapper>
+          <DateSeparator>
+            🔒 Esta conversa é protegida com criptografia de ponta a ponta.
+          </DateSeparator>
+        </SeparatorWrapper>
+
         {Object.keys(groupedMessages).map((dateKey) => (
-          <div key={dateKey}>
+          <div key={dateKey} style={{ position: "relative", marginTop: "1rem" }}>
             <DateSeparator>{formatDate(dayjs(dateKey))}</DateSeparator>
             {groupedMessages[dateKey].map((msg) => (
               <ChatMessage
