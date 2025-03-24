@@ -5,9 +5,11 @@ import {
   Footer,
   NavButton,
   SectionTitle,
-  RequestItem,RequestButtons,
-  UserProfile
+  RequestItem,
+  RequestButtons,
+  ScrollArea
 } from "./styles";
+
 import { useEffect, useState } from "react";
 import { db } from "../../services/firebase";
 import { useAuth } from "../../contexts/AuthContext";
@@ -25,14 +27,14 @@ import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
 import AddContactModal from "../AddContactModal";
 
-
 const ContactSidebar = ({ onSelectContact }) => {
   const { user, logout } = useAuth();
   const [contacts, setContacts] = useState([]);
   const [unreads, setUnreads] = useState({});
+  const [requests, setRequests] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-  const [requests, setRequests] = useState([]);
+
   useEffect(() => {
     if (!user) return;
 
@@ -48,19 +50,18 @@ const ContactSidebar = ({ onSelectContact }) => {
 
   useEffect(() => {
     if (!user) return;
-    
-    console.log("User ID no listener", user?.uid)
+
     const q = query(
       collection(db, "friendRequests"),
       where("to", "==", user.uid),
       where("status", "==", "pending")
     );
-  
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setRequests(list);
     });
-  
+
     return () => unsubscribe();
   }, [user]);
 
@@ -127,55 +128,46 @@ const ContactSidebar = ({ onSelectContact }) => {
 
   return (
     <Container>
-      <SectionTitle>Contatos</SectionTitle>
-       {/* Solicitações pendentes */}
-       {requests.length > 0 && (
-        <>
-          <SectionTitle>Solicitações</SectionTitle>
-          {requests.map((req) => (
-            <RequestItem key={req.id}>
-              <span>{req.fromEmail}</span>
-              <RequestButtons>
-                <button onClick={() => handleAccept(req)}>✔</button>
-                <button onClick={() => handleReject(req.id)}>✖</button>
-              </RequestButtons>
-            </RequestItem>
-          ))}
-        </>
-      )}
+      <ScrollArea>
+        {requests.length > 0 && (
+          <>
+            <SectionTitle>Solicitações</SectionTitle>
+            {requests.map((req) => (
+              <RequestItem key={req.id}>
+                <span>{req.fromEmail}</span>
+                <RequestButtons>
+                  <button onClick={() => handleAccept(req)}>✔</button>
+                  <button onClick={() => handleReject(req.id)}>✖</button>
+                </RequestButtons>
+              </RequestItem>
+            ))}
+          </>
+        )}
 
-      {/* Lista de contatos */}
-      {contacts.map((c) => {
-        const conversationId =
-          user.uid < c.uid
-            ? `${user.uid}_${c.uid}`
-            : `${c.uid}_${user.uid}`;
+        <SectionTitle>Contatos</SectionTitle>
+        {contacts.map((c) => {
+          const conversationId =
+            user.uid < c.uid
+              ? `${user.uid}_${c.uid}`
+              : `${c.uid}_${user.uid}`;
+          const count = unreads[conversationId] || 0;
 
-        const count = unreads[conversationId] || 0;
+          return (
+            <ContactItem key={c.uid} onClick={() => onSelectContact(c)}>
+              <img src={c.photoURL || "/profile.jpeg"} alt="avatar" />
+              <span>{c.displayName || c.email}</span>
+              {count > 0 && <Badge>{count}</Badge>}
+            </ContactItem>
+          );
+        })}
+      </ScrollArea>
 
-        return (
-          <ContactItem key={c.uid} onClick={() => onSelectContact(c)}>
-            <img src={c.photoURL || "/profile.jpeg"} alt="avatar" />
-            <span>{c.displayName || c.email}</span>
-            {count > 0 && <Badge>{count}</Badge>}
-          </ContactItem>
-        );
-      })}
-
-<Footer>
-  <UserProfile onClick={() => navigate("/profile")}>
-    <img src={user.photoURL || "/profile.jpeg"} alt="avatar" />
-    <div>
-      <strong>{user.displayName || "Meu Perfil"}</strong>
-      <small>{user.email}</small>
-    </div>
-  </UserProfile>
-
-  <NavButton onClick={() => setShowModal(true)}>➕ Adicionar Contato</NavButton>
-  <NavButton onClick={logout}>🚪 Sair</NavButton>
-  <ThemeToggle />
-</Footer>
-
+      <Footer>
+        <NavButton onClick={() => setShowModal(true)}>+ Contato</NavButton>
+        <NavButton onClick={() => navigate("/profile")}>👤 Meu Perfil</NavButton>
+        <NavButton onClick={logout}>🚪 Sair</NavButton>
+        <ThemeToggle />
+      </Footer>
 
       <AddContactModal isOpen={showModal} onClose={() => setShowModal(false)} />
     </Container>

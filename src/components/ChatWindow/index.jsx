@@ -120,13 +120,13 @@ const ChatWindow = ({ contact }) => {
 
   return (
     <Container>
-      <Header>
-        <ContactAvatar src={contact.photoURL || "/default-avatar.png"} />
-        <ContactInfo>
-          <ContactName>{contact.displayName || contact.email}</ContactName>
-          <span>Online</span>
-        </ContactInfo>
-      </Header>
+     <Header>
+  <ContactAvatar src={contact.photoURL || "/default-avatar.png"} />
+  <ContactInfo>
+    <ContactName>{contact.displayName || contact.email}</ContactName>
+    <span>Online</span>
+  </ContactInfo>
+</Header>
 
       <Messages ref={messagesRef}>
         <SeparatorWrapper>

@@ -1,27 +1,36 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  width: 250px;
-  background: ${({ theme }) => theme.surface};
-  border-right: 1px solid #ddd;
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow-y: auto;
+  height: 100%;
+  background: ${({ theme }) => theme.surface};
 `;
 
+export const ScrollArea = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+`;
+
+export const SectionTitle = styled.h3`
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: ${({ theme }) => theme.secondary};
+`;
 
 export const ContactItem = styled.div`
   display: flex;
   align-items: center;
-  padding: 0.5rem;
+  padding: 0.6rem 0.8rem;
   border-radius: 8px;
+  background: transparent;
   cursor: pointer;
-  gap: 0.75rem;
+  transition: background 0.2s ease;
+  position: relative;
 
   &:hover {
-    background: #e6e6e6;
+    background: ${({ theme }) => theme.background};
   }
 
   img {
@@ -29,45 +38,50 @@ export const ContactItem = styled.div`
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
+    margin-right: 0.75rem;
   }
 
   span {
+    flex: 1;
     font-size: 0.95rem;
-    color: #333;
+    color: ${({ theme }) => theme.text};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
-export const SectionTitle = styled.h3`
-  margin-bottom: 1rem;
-  color: ${({ theme }) => theme.primary};
-`;
-
-export const Badge = styled.div`
-  background: red;
-  color: white;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border-radius: 12px;
-  margin-left: auto;
-  font-weight: bold;
+export const Badge = styled.span`
+  background: ${({ theme }) => theme.primary};
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
 `;
 
 export const Footer = styled.div`
-  margin-top: auto;
+  padding: 1rem;
+  border-top: 1px solid ${({ theme }) => theme.secondary};
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  padding-top: 2rem;
+  justify-content: space-between;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 export const NavButton = styled.button`
+  flex: 1;
   background: ${({ theme }) => theme.primary};
-  color: ${({ theme }) => theme.surface};
-  padding: 0.5rem 1rem;
+  color: #fff;
   border: none;
   border-radius: 8px;
+  padding: 0.6rem 1rem;
   cursor: pointer;
-  font-weight: bold;
+  font-size: 0.85rem;
+  transition: background 0.3s;
 
   &:hover {
     background: ${({ theme }) => theme.accent};
@@ -75,71 +89,39 @@ export const NavButton = styled.button`
 `;
 
 export const RequestItem = styled.div`
-  background: ${({ theme }) => theme.surface};
-  padding: 0.5rem;
+  background: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 8px;
+  padding: 0.5rem 0.75rem;
   margin-bottom: 0.5rem;
-  color: ${({ theme }) => theme.text};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    font-size: 0.85rem;
+    color: ${({ theme }) => theme.text};
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 
 export const RequestButtons = styled.div`
-  margin-top: 0.25rem;
   display: flex;
   gap: 0.5rem;
 
   button {
-    padding: 0.25rem 0.75rem;
+    background: ${({ theme }) => theme.primary};
+    color: #fff;
     border: none;
+    padding: 0.3rem 0.6rem;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
+    font-size: 0.9rem;
 
-    &:first-child {
-      background: ${({ theme }) => theme.success};
-      color: white;
-    }
-
-    &:last-child {
-      background: ${({ theme }) => theme.error};
-      color: white;
-    }
-  }
-`;
-export const UserProfile = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border: none;
-  background: none;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  text-align: left;
-  padding: 0.5rem 0;
-  border-radius: 8px;
-
-  &:hover {
-    background: ${({ theme }) => theme.accent}20;
-  }
-
-  img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-    color: ${({ theme }) => theme.text};
-
-    strong {
-      font-size: 0.95rem;
-    }
-
-    small {
-      font-size: 0.75rem;
-      color: ${({ theme }) => theme.secondary};
+    &:hover {
+      background: ${({ theme }) => theme.accent};
     }
   }
 `;

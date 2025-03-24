@@ -2,11 +2,11 @@ import styled from "styled-components";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { themeName, toggleTheme } = useTheme();
 
   return (
     <ToggleButton onClick={toggleTheme}>
-      {theme === "light" ? "🌙 Modo Escuro" : "☀️ Modo Claro"}
+      {themeName === "light" ? "🌙 Modo Escuro" : "☀️ Modo Claro"}
     </ToggleButton>
   );
 };

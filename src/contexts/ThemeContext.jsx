@@ -1,22 +1,31 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { lightTheme, darkTheme } from "../styles/theme";
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("light");
+  const [themeName, setThemeName] = useState("light");
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  useEffect(() => {
+    const stored = localStorage.getItem("chat-theme");
+    if (stored) setThemeName(stored);
+  }, []);
 
-  const currentTheme = theme === "light" ? lightTheme : darkTheme;
+  useEffect(() => {
+    localStorage.setItem("chat-theme", themeName);
+  }, [themeName]);
+
+  const toggleTheme = () => {
+    const newTheme = themeName === "light" ? "dark" : "light";
+    setThemeName(newTheme);
+  };
+
+  const selectedTheme = themeName === "light" ? lightTheme : darkTheme;
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <StyledThemeProvider theme={currentTheme}>
-        {children}
-      </StyledThemeProvider>
+    <ThemeContext.Provider value={{ themeName, toggleTheme }}>
+      <StyledThemeProvider theme={selectedTheme}>{children}</StyledThemeProvider>
     </ThemeContext.Provider>
   );
 };

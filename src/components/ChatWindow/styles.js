@@ -11,10 +11,15 @@ export const Container = styled.div`
 export const Header = styled.div`
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   padding: 1rem;
   background: ${({ theme }) => theme.surface};
   border-bottom: 1px solid ${({ theme }) => theme.secondary};
+  position: sticky;
+  top: 0;
+  z-index: 10;
 `;
+
 
 export const ContactAvatar = styled.img`
   width: 40px;
@@ -22,7 +27,6 @@ export const ContactAvatar = styled.img`
   border-radius: 50%;
   object-fit: cover;
 `;
-
 export const ContactInfo = styled.div`
   margin-left: 0.75rem;
   display: flex;
