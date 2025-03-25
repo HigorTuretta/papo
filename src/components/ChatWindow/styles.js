@@ -4,7 +4,7 @@ export const Container = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100dvh;
   background: ${({ theme }) => theme.background};
 `;
 

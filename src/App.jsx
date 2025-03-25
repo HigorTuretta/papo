@@ -5,12 +5,16 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Layout from "./components/Layout";
 import { useState } from "react";
+import Lottie from "lottie-react";
+import LoadingAnim from './assets/Loading.json'
 
 function App() {
   const { user, loading } = useAuth();
   const [selectedContact, setSelectedContact] = useState(null);
 
-  if (loading) return <div>Carregando...</div>;
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100dvw', height: '100dvh' }}>
+    <Lottie animationData={LoadingAnim} loop={true} />
+  </div>;
 
   return (
     <Routes>
