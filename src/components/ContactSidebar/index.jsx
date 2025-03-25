@@ -202,7 +202,7 @@ import {
   
       <FooterBottom>
        <Logo><img src={LogoImg} />papo.</Logo>
-       <Attribution>Powered by Turetta <br /> {version}</Attribution>
+       <Attribution>Powered by Turetta <br /> v{version}</Attribution>
       </FooterBottom>
      </Footer>
   

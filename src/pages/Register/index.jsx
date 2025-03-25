@@ -1,10 +1,22 @@
-import { Container, Form, Input, Button, Title, LinkText } from "./styles";
+import {
+  Container,
+  CenterBox,
+  Logo,
+  Slogan,
+  FormCard,
+  Title,
+  Input,
+  Button,
+  LinkText,
+} from "./styles";
+
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../../services/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import LogoImg from "../../assets/Logo.png";
 
 const Register = () => {
   const { register } = useAuth();
@@ -16,8 +28,6 @@ const Register = () => {
     e.preventDefault();
     try {
       const res = await register(email, password);
-
-      // salva no Firestore
       await setDoc(doc(db, "users", res.user.uid), {
         uid: res.user.uid,
         email: res.user.email,
@@ -34,28 +44,37 @@ const Register = () => {
 
   return (
     <Container>
-      <Form onSubmit={handleRegister}>
-        <Title>Criar Conta 📝</Title>
-        <Input
-          placeholder="E-mail"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          placeholder="Senha"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit">Cadastrar</Button>
+      <CenterBox>
+        <Slogan>SÓ MANDAR O </Slogan>
+        <Logo>
+          <img src={LogoImg} alt="logo" />
+          <span>papo.</span>
+        </Logo>
 
-        <LinkText>
-          Já tem uma conta? <Link to="/login">Entrar</Link>
-        </LinkText>
-      </Form>
+        <FormCard onSubmit={handleRegister}>
+          <Title>Criar Conta</Title>
+          <Input
+            placeholder="Seu e-mail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="false"
+          />
+          <Input
+            placeholder="Crie uma senha"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="false"
+          />
+          <Button type="submit">Cadastrar</Button>
+          <LinkText>
+            Já tem uma conta? <Link to="/login">Entrar</Link>
+          </LinkText>
+        </FormCard>
+      </CenterBox>
     </Container>
   );
 };

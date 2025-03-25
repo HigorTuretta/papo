@@ -1,9 +1,22 @@
-import { Container, Form, Input, Button, GoogleButton, Title, LinkText } from "./styles";
+import {
+  Container,
+  CenterBox,
+  Logo,
+  Slogan,
+  FormCard,
+  Title,
+  Input,
+  Button,
+  GoogleButton,
+  LinkText,
+} from "./styles";
+
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaGoogle } from "react-icons/fa";
+import LogoImg from "../../assets/Logo.png";
 
 const Login = () => {
   const { login, loginWithGoogle } = useAuth();
@@ -22,33 +35,54 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      toast.success("Login com Google realizado!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Erro ao entrar com o Google.");
+    }
+  };
+
   return (
     <Container>
-      <Form onSubmit={handleLogin}>
-        <Title>Bem-vindo ao Papo 💬</Title>
-        <Input
-          placeholder="E-mail"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          placeholder="Senha"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit">Entrar</Button>
-        <GoogleButton type="button" onClick={loginWithGoogle}>
-          <FaGoogle /> Entrar com Google
-        </GoogleButton>
+      <CenterBox>
+        <Slogan>SÓ MANDAR O </Slogan>
+        <Logo>
+          <img src={LogoImg} alt="logo" />
+          <span>papo.</span>
+        </Logo>
 
-        <LinkText>
-          Ainda não tem uma conta? <Link to="/register">Crie uma agora</Link>
-        </LinkText>
-      </Form>
+        <FormCard onSubmit={handleLogin}>
+          <Title>Bem vindo(a)! 😁</Title>
+          <Input
+            placeholder="Seu e-mail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="Sua senha"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button type="submit">Entrar</Button>
+          <GoogleButton type="button" onClick={handleGoogleLogin}>
+            <FaGoogle />
+            Entrar com Google
+          </GoogleButton>
+          <LinkText>
+            Ainda não tem uma conta? <Link to="/register">Criar agora!</Link>
+          </LinkText>
+          <LinkText>
+            Esqueceu a senha? <Link to="/forgot-password">Recupere ela!</Link>
+          </LinkText>
+        </FormCard>
+      </CenterBox>
     </Container>
   );
 };
