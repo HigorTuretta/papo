@@ -14,7 +14,6 @@ export const Header = styled.div`
   gap: 0.75rem;
   padding: 0.8rem 1rem;
   background: ${({ theme }) => theme.surface};
-  border-bottom: 1px solid ${({ theme }) => theme.secondary};
   position: sticky;
   top: 0;
   z-index: 10;
@@ -118,7 +117,6 @@ export const InputArea = styled.form`
   display: flex;
   align-items: center;
   padding: 0.75rem;
-  border-top: 1px solid ${({ theme }) => theme.secondary};
   background: ${({ theme }) => theme.surface};
   gap: 0.5rem;
 `;
@@ -143,7 +141,7 @@ export const Input = styled.input`
   flex: 1;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid ${({ theme }) => theme.secondary};
+  border: none;
   border-radius: 999px;
   background: ${({ theme }) => theme.background};
   color: ${({ theme }) => theme.text};
@@ -151,7 +149,7 @@ export const Input = styled.input`
 `;
 
 export const SendButton = styled.button`
-  background: ${({ theme }) => theme.primary};
+  background: linear-gradient(135deg, ${({theme}) => theme.primary} 0%, ${({theme}) => theme.secondary} 110%);
   border: none;
   border-radius: 50%;
   color: ${({ theme }) => theme.surface};
@@ -162,9 +160,9 @@ export const SendButton = styled.button`
   justify-content: center;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
 
   &:hover {
-    background: ${({ theme }) => theme.accent};
+   filter: brightness(0.7)
   }
 `;

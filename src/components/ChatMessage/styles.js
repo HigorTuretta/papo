@@ -1,5 +1,12 @@
 import styled from "styled-components";
 
+const bubbleSender = ({ theme }) => 
+  `linear-gradient(155deg, ${theme.primary} 60%, ${theme.secondary} 100%)`;
+
+const bubbleReciever = ({ theme }) => 
+  `linear-gradient(135deg, ${theme.surface} 80%, ${theme.secondary} 110%)`;
+
+
 export const Container = styled.div`
   display: flex;
   justify-content: ${({ $isSender }) => ($isSender ? "flex-end" : "flex-start")};
@@ -15,8 +22,8 @@ export const BubbleWrapper = styled.div`
 `;
 
 export const Bubble = styled.div`
-  background: ${({ theme, $isSender }) =>
-    $isSender ? theme.primary : theme.surface};
+ background: ${({ theme, $isSender }) =>
+  $isSender ? bubbleSender({ theme }) : bubbleReciever({ theme })};
   color: ${({ theme, $isSender }) => ($isSender ? "#fff" : theme.text)};
   padding: 0.8rem 1rem;
   border-radius: 16px;
