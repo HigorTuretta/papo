@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import bgLight from '../../assets/backgroundLight.svg'
+import bgDark from '../../assets/backgroundDark.svg'
 
 export const Container = styled.div`
   flex: 1;
@@ -53,20 +55,28 @@ export const Messages = styled.div`
   padding: 1rem 0.75rem;
   display: flex;
   flex-direction: column;
-  background: ${({ theme }) => theme.background};
   scroll-behavior: smooth;
+  background-color: ${({ theme }) => theme.background};
+  background-image: ${({ $themeName }) =>
+    $themeName === "light" ? `url(${bgLight})` : `url(${bgDark})`};
+  background-position: center;
+  background-repeat: repeat;
+  background-attachment: fixed;
 
   &::before {
     content: "";
     position: sticky;
     top: 0;
     height: 30px;
-    background: linear-gradient(to bottom, ${({ theme }) => theme.background} 0%, transparent 100%);
+    background: linear-gradient(
+      to bottom,
+      ${({ theme }) => theme.background} 0%,
+      transparent 100%
+    );
     pointer-events: none;
     z-index: 2;
   }
 
-  /* Scrollbar personalizada */
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -87,6 +97,7 @@ export const Messages = styled.div`
   scrollbar-color: ${({ theme }) => theme.secondary} transparent;
   scrollbar-width: thin;
 `;
+
 
 
 export const DateSeparator = styled.div`
@@ -149,7 +160,7 @@ export const Input = styled.input`
 `;
 
 export const SendButton = styled.button`
-  background: linear-gradient(135deg, ${({theme}) => theme.primary} 0%, ${({theme}) => theme.secondary} 110%);
+  background: linear-gradient(135deg, ${({ theme }) => theme.primary} 0%, ${({ theme }) => theme.secondary} 110%);
   border: none;
   border-radius: 50%;
   color: ${({ theme }) => theme.surface};

@@ -33,6 +33,7 @@ import isToday from "dayjs/plugin/isToday";
 import isYesterday from "dayjs/plugin/isYesterday";
 import CryptoJS from "crypto-js";
 import imageCompression from "browser-image-compression";
+import { useTheme } from "../../contexts/ThemeContext";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -50,6 +51,7 @@ const ChatWindow = ({ contact }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesRef = useRef(null);
+  const { themeName } = useTheme();
 
   const conversationId =
     user.uid < contact.uid
@@ -159,6 +161,7 @@ const ChatWindow = ({ contact }) => {
 
   return (
     <Container>
+
       <Header>
         <ContactAvatar src={contact.photoURL || "/profile.jpeg"} />
         <ContactInfo>
@@ -167,7 +170,7 @@ const ChatWindow = ({ contact }) => {
         </ContactInfo>
       </Header>
 
-      <Messages ref={messagesRef}>
+      <Messages ref={messagesRef} $themeName={themeName}>
         <SeparatorWrapper>
           <DateSeparator>
             🔒 Esta conversa é protegida com criptografia de ponta a ponta.
