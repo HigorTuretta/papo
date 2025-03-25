@@ -18,6 +18,10 @@ export const Header = styled.div`
   position: sticky;
   top: 0;
   z-index: 10;
+
+  @media (max-width: 768px) {
+   padding-left: 5rem;
+  }
 `;
 
 export const ContactAvatar = styled.img`
