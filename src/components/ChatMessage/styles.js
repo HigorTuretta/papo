@@ -88,6 +88,7 @@ export const Media = styled.div`
   audio {
     max-width: 100%;
     border-radius: 12px;
+    object-fit: contain;
   }
 
   audio {
@@ -102,3 +103,4 @@ export const ReactionWrapper = styled.div`
   align-items: ${({ $isSender }) => ($isSender ? "flex-end" : "flex-start")};
   max-width: 100%;
 `;
+

@@ -1,4 +1,3 @@
-// 📁 ChatWindow/index.jsx
 import { useEffect, useRef, useState } from "react";
 import {
   Container,
@@ -11,9 +10,10 @@ import {
   ContactInfo,
   ContactAvatar,
   DateSeparator,
-  SeparatorWrapper
+  SeparatorWrapper,
+  ImageButton,
+  ImageInput
 } from "./styles";
-import { db } from "../../services/firebase";
 import {
   collection,
   addDoc,
@@ -24,18 +24,22 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
+import { db } from "../../services/firebase";
 import { useAuth } from "../../contexts/AuthContext";
-import { FaPaperPlane } from "react-icons/fa";
+import { FaPaperPlane, FaCamera } from "react-icons/fa";
 import ChatMessage from "../ChatMessage";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import isYesterday from "dayjs/plugin/isYesterday";
 import CryptoJS from "crypto-js";
+import imageCompression from "browser-image-compression";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
 const SECRET_KEY = import.meta.env.VITE_CHAT_SECRET_KEY;
+const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/upload`;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const encryptMessage = (text) => {
   return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
@@ -59,10 +63,7 @@ const ChatWindow = ({ contact }) => {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setMessages(msgs);
 
       msgs.forEach((msg) => {
@@ -94,9 +95,47 @@ const ChatWindow = ({ contact }) => {
       createdAt: serverTimestamp(),
       read: false,
       reaction: "",
+      type: "text"
     });
 
     setMessage("");
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+
+      const formData = new FormData();
+      formData.append("file", compressed);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const res = await fetch(CLOUDINARY_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!data.secure_url) throw new Error("Upload falhou");
+
+      await addDoc(collection(db, "conversations", conversationId, "messages"), {
+        from: user.uid,
+        to: contact.uid,
+        createdAt: serverTimestamp(),
+        read: false,
+        type: "image",
+        mediaUrl: data.secure_url,
+        reaction: ""
+      });
+    } catch (err) {
+      console.error("Erro ao enviar imagem:", err);
+    }
   };
 
   const formatDate = (timestamp) => {
@@ -120,13 +159,13 @@ const ChatWindow = ({ contact }) => {
 
   return (
     <Container>
-     <Header>
-  <ContactAvatar src={contact.photoURL || "/default-avatar.png"} />
-  <ContactInfo>
-    <ContactName>{contact.displayName || contact.email}</ContactName>
-    <span>Online</span>
-  </ContactInfo>
-</Header>
+      <Header>
+        <ContactAvatar src={contact.photoURL || "/profile.jpeg"} />
+        <ContactInfo>
+          <ContactName>{contact.displayName || contact.email}</ContactName>
+          <span>Online</span>
+        </ContactInfo>
+      </Header>
 
       <Messages ref={messagesRef}>
         <SeparatorWrapper>
@@ -151,6 +190,15 @@ const ChatWindow = ({ contact }) => {
       </Messages>
 
       <InputArea onSubmit={handleSend}>
+        <ImageButton htmlFor="image-upload">
+          <FaCamera />
+        </ImageButton>
+        <ImageInput
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+        />
         <Input
           placeholder="Digite sua mensagem..."
           value={message}

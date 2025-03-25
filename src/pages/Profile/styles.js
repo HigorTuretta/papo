@@ -7,16 +7,17 @@ export const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
 `;
 
 export const Form = styled.form`
   background: ${({ theme }) => theme.surface};
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
   width: 100%;
   max-width: 400px;
 `;
@@ -41,6 +42,7 @@ export const BackButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.9rem;
 
   &:hover {
     text-decoration: underline;
@@ -48,13 +50,29 @@ export const BackButton = styled.button`
 `;
 
 export const Avatar = styled.img`
-  width: 100px;
-  height: 100px;
-  align-self: center;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   object-fit: cover;
-  margin: 1rem 0;
-  border: 2px solid ${({ theme }) => theme.primary};
+  border: 3px solid ${({ theme }) => theme.primary};
+  transition: 0.3s;
+`;
+
+export const UploadInput = styled.input`
+  display: none;
+`;
+
+export const UploadLabel = styled.label`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: ${({ theme }) => theme.primary};
+  color: white;
+  padding: 0.4rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 2px solid ${({ theme }) => theme.surface};
 `;
 
 export const Label = styled.label`
@@ -84,5 +102,10 @@ export const Button = styled.button`
 
   &:hover {
     background: #218838;
+  }
+
+  &:disabled {
+    background: #aaa;
+    cursor: not-allowed;
   }
 `;

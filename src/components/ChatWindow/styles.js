@@ -12,7 +12,7 @@ export const Header = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0.8rem 1rem;
   background: ${({ theme }) => theme.surface};
   border-bottom: 1px solid ${({ theme }) => theme.secondary};
   position: sticky;
@@ -20,17 +20,17 @@ export const Header = styled.div`
   z-index: 10;
 `;
 
-
 export const ContactAvatar = styled.img`
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
 `;
+
 export const ContactInfo = styled.div`
-  margin-left: 0.75rem;
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 
   span {
     font-size: 0.75rem;
@@ -47,7 +47,7 @@ export const ContactName = styled.h3`
 export const Messages = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1rem 0.75rem;
   display: flex;
   flex-direction: column;
   background: ${({ theme }) => theme.background};
@@ -62,7 +62,29 @@ export const Messages = styled.div`
     pointer-events: none;
     z-index: 2;
   }
+
+  /* Scrollbar personalizada */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.secondary};
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${({ theme }) => theme.accent};
+  }
+
+  scrollbar-color: ${({ theme }) => theme.secondary} transparent;
+  scrollbar-width: thin;
 `;
+
 
 export const DateSeparator = styled.div`
   position: sticky;
@@ -70,26 +92,47 @@ export const DateSeparator = styled.div`
   z-index: 2;
   text-align: center;
   font-size: 0.85rem;
-  font-weight: bold;
+  font-weight: 500;
   color: ${({ theme }) => theme.secondary};
-  background: ${({ theme }) => theme.surfaceTransparent};
+  background: ${({ theme }) => theme.surfaceTransparent || theme.surface};
   backdrop-filter: blur(6px);
-  padding: 0.4rem 1rem;
+  padding: 0.3rem 1rem;
   border-radius: 999px;
-  margin: 0 auto 0.5rem;
+  margin: 0 auto 0.8rem;
   width: fit-content;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   pointer-events: none;
 `;
 
-
-
+export const SeparatorWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+`;
 
 export const InputArea = styled.form`
   display: flex;
-  padding: 1rem;
+  align-items: center;
+  padding: 0.75rem;
   border-top: 1px solid ${({ theme }) => theme.secondary};
-  background: ${({ theme }) => theme.surface };
+  background: ${({ theme }) => theme.surface};
+  gap: 0.5rem;
+`;
+
+export const ImageButton = styled.label`
+  color: ${({ theme }) => theme.primary};
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+export const ImageInput = styled.input`
+  display: none;
 `;
 
 export const Input = styled.input`
@@ -110,7 +153,6 @@ export const SendButton = styled.button`
   color: ${({ theme }) => theme.surface};
   width: 45px;
   height: 45px;
-  margin-left: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,10 +163,4 @@ export const SendButton = styled.button`
   &:hover {
     background: ${({ theme }) => theme.accent};
   }
-`;
-
-export const SeparatorWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 0.5rem 0;
 `;

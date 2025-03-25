@@ -1,14 +1,22 @@
+// 📁 components/ContactSidebar/index.jsx
 import {
   Container,
   ContactItem,
   Badge,
   Footer,
   NavButton,
+  NavRow,
+  FooterBottom,
+  Logo,
+  Attribution,
   SectionTitle,
   RequestItem,
   RequestButtons,
   ScrollArea
 } from "./styles";
+
+
+
 
 import { useEffect, useState } from "react";
 import { db } from "../../services/firebase";
@@ -26,6 +34,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
 import AddContactModal from "../AddContactModal";
+import { FiUserPlus, FiUser, FiLogOut } from "react-icons/fi";
 
 const ContactSidebar = ({ onSelectContact }) => {
   const { user, logout } = useAuth();
@@ -39,7 +48,6 @@ const ContactSidebar = ({ onSelectContact }) => {
     if (!user) return;
 
     const ref = collection(db, "contacts", user.uid, "list");
-
     const unsubscribe = onSnapshot(ref, (snapshot) => {
       const list = snapshot.docs.map((doc) => doc.data());
       setContacts(list);
@@ -76,22 +84,23 @@ const ContactSidebar = ({ onSelectContact }) => {
           ? `${user.uid}_${contact.uid}`
           : `${contact.uid}_${user.uid}`;
 
-      const convDocRef = doc(db, "users", user.uid, "conversationsData", conversationId);
+      const q = query(
+        collection(db, "conversations", conversationId, "messages"),
+        where("to", "==", user.uid),
+        where("read", "==", false)
+      );
 
-      const unsubscribe = onSnapshot(convDocRef, (docSnap) => {
-        const data = docSnap.data();
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         setUnreads((prev) => ({
           ...prev,
-          [conversationId]: data?.unreadCount || 0,
+          [conversationId]: snapshot.size,
         }));
       });
 
       unsubList.push(unsubscribe);
     });
 
-    return () => {
-      unsubList.forEach((unsub) => unsub());
-    };
+    return () => unsubList.forEach((unsub) => unsub());
   }, [user, contacts]);
 
   const handleAccept = async (req) => {
@@ -161,12 +170,32 @@ const ContactSidebar = ({ onSelectContact }) => {
           );
         })}
       </ScrollArea>
-
       <Footer>
-        <NavButton onClick={() => setShowModal(true)}>+ Contato</NavButton>
-        <NavButton onClick={() => navigate("/profile")}>👤 Meu Perfil</NavButton>
-        <NavButton onClick={logout}>🚪 Sair</NavButton>
-        <ThemeToggle />
+        <NavRow>
+          <NavButton onClick={() => setShowModal(true)}>
+            <FiUserPlus />
+            Contato
+          </NavButton>
+          <NavButton onClick={() => navigate("/profile")}>
+            <FiUser />
+            Perfil
+          </NavButton>
+        </NavRow>
+
+        <NavRow>
+          <NavButton onClick={logout}>
+            <FiLogOut />
+            Sair
+          </NavButton>
+          <ThemeToggle />
+        </NavRow>
+
+
+        <FooterBottom>
+
+          <Logo>papo.</Logo>
+          <Attribution>Powered by Turetta</Attribution>
+        </FooterBottom>
       </Footer>
 
       <AddContactModal isOpen={showModal} onClose={() => setShowModal(false)} />

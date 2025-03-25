@@ -30,6 +30,7 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
   const decryptedText = type === "text" ? decryptMessage(text) : "";
 
   const [showReactions, setShowReactions] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
   const menuRef = useRef(null);
   const bubbleRef = useRef(null);
   const [menuStyle, setMenuStyle] = useState({});
@@ -75,36 +76,73 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
   };
 
   return (
-    <Container $isSender={isSender}>
-      <ReactionWrapper>
-        <Bubble
-          ref={bubbleRef}
-          $isSender={isSender}
-          onContextMenu={handleMenu}
-          onTouchStart={handleMenu}
-        >
-          {type === "text" && <Text>{renderText(decryptedText)}</Text>}
-          {type === "image" && mediaUrl && <Media><img src={mediaUrl} alt="imagem" /></Media>}
-          {type === "audio" && mediaUrl && <Media><audio controls src={mediaUrl} /></Media>}
-          {type === "video" && mediaUrl && <Media><video controls src={mediaUrl} width="250" /></Media>}
-          {isSender && read && (
-            <small style={{ fontSize: "0.7rem", opacity: 0.7 }}>✔✔ Lido</small>
+    <>
+      <Container $isSender={isSender}>
+        <ReactionWrapper>
+          <Bubble
+            ref={bubbleRef}
+            $isSender={isSender}
+            onContextMenu={handleMenu}
+            onTouchStart={handleMenu}
+          >
+            {type === "text" && <Text>{renderText(decryptedText)}</Text>}
+
+            {type === "image" && mediaUrl && (
+              <Media>
+                <img src={mediaUrl} alt="imagem" onClick={() => setPreviewImage(mediaUrl)} />
+              </Media>
+            )}
+
+            {type === "audio" && mediaUrl && (
+              <Media><audio controls src={mediaUrl} /></Media>
+            )}
+            {type === "video" && mediaUrl && (
+              <Media><video controls src={mediaUrl} width="250" /></Media>
+            )}
+            {isSender && read && (
+              <small style={{ fontSize: "0.7rem", opacity: 0.7 }}>✔✔ Lido</small>
+            )}
+          </Bubble>
+
+          {reaction && (
+            <ReactionBubble $isSender={isSender}>{reaction}</ReactionBubble>
           )}
-        </Bubble>
 
-        {reaction && (
-          <ReactionBubble $isSender={isSender}>{reaction}</ReactionBubble>
-        )}
+          {showReactions && (
+            <ReactionMenu ref={menuRef} style={menuStyle}>
+              {["👍", "❤️", "😂", "😮", "😢"].map((emoji) => (
+                <span key={emoji} onClick={() => selectReaction(emoji)}>{emoji}</span>
+              ))}
+            </ReactionMenu>
+          )}
+        </ReactionWrapper>
+      </Container>
 
-        {showReactions && (
-          <ReactionMenu ref={menuRef} style={menuStyle}>
-            {["👍", "❤️", "😂", "😮", "😢"].map((emoji) => (
-              <span key={emoji} onClick={() => selectReaction(emoji)}>{emoji}</span>
-            ))}
-          </ReactionMenu>
-        )}
-      </ReactionWrapper>
-    </Container>
+      {previewImage && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "zoom-out"
+          }}
+          onClick={() => setPreviewImage(null)}
+        >
+          <img
+            src={previewImage}
+            alt="Preview"
+            style={{ maxWidth: "90%", maxHeight: "90%", borderRadius: "8px" }}
+          />
+        </div>
+      )}
+    </>
   );
 };
 
