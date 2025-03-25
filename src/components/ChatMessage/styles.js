@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const bubbleSender = ({ theme }) => 
-  `linear-gradient(155deg, ${theme.primary} 60%, ${theme.secondary} 100%)`;
+  `linear-gradient(135deg, ${theme.primary} 80%,rgb(36, 36, 36) 110%)`;
 
 const bubbleReciever = ({ theme }) => 
   `linear-gradient(135deg, ${theme.surface} 80%, ${theme.secondary} 110%)`;

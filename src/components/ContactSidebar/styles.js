@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
   background: ${({ theme }) => theme.surface};
 `;
 
@@ -110,11 +110,50 @@ export const RequestButtons = styled.div`
 `;
 
 export const Footer = styled.div`
-  padding: 1rem;
-  border-top: 1px solid ${({ theme }) => theme.secondary};
+ border-top: 1px solid ${({ theme }) => theme.secondary};
+ background: ${({ theme }) => theme.surface};
+ transition: all 0.3s ease;
+ padding: 0.5rem 1rem;
+  width: 100%;
+
+ .toggle {
+ width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: ${({ theme }) => theme.background};
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin: 0 auto 0.8rem auto;
+  transition: background 0.3s;
+  
+  svg {
+   font-size: 1.2rem;
+   color: ${({ theme }) => theme.primary};
+  }
+
+  span {
+   color: ${({ theme }) => theme.text};
+  }
+
+  &:hover {
+   background: ${({ theme }) => theme.surfaceHover || theme.accent + '22'};
+  }
+ }
+
+ .content {
+  max-height: ${({ $isOpen }) => ($isOpen ? '1000px' : '0')};
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  overflow: hidden;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: ${({ $isOpen }) => ($isOpen ? '1rem' : '0')};
+ }
 `;
 
 export const NavRow = styled.div`
@@ -156,6 +195,7 @@ export const FooterBottom = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   font-size: 0.7rem;
   color: ${({ theme }) => theme.secondary};
 `;
