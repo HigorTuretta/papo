@@ -15,9 +15,7 @@ import {
   ScrollArea
 } from "./styles";
 
-
-
-
+import LogoImg from '../../assets/Logo.png'
 import { useEffect, useState } from "react";
 import { db } from "../../services/firebase";
 import { useAuth } from "../../contexts/AuthContext";
@@ -35,6 +33,7 @@ import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
 import AddContactModal from "../AddContactModal";
 import { FiUserPlus, FiUser, FiLogOut } from "react-icons/fi";
+import {version} from '../../../package.json'
 
 const ContactSidebar = ({ onSelectContact }) => {
   const { user, logout } = useAuth();
@@ -193,8 +192,8 @@ const ContactSidebar = ({ onSelectContact }) => {
 
         <FooterBottom>
 
-          <Logo>papo.</Logo>
-          <Attribution>Powered by Turetta</Attribution>
+          <Logo><img src={LogoImg} />papo.</Logo>
+          <Attribution>Powered by Turetta <br/> {version}</Attribution>
         </FooterBottom>
       </Footer>
 

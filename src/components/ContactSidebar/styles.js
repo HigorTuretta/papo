@@ -172,6 +172,7 @@ export const LogoText = styled.div`
 export const Attribution = styled.span`
   font-size: 0.7rem;
   color: ${({ theme }) => theme.secondary};
+  text-align:right;
 `;
 
 export const Logo = styled.div`
@@ -182,4 +183,13 @@ export const Logo = styled.div`
   text-transform: lowercase;
   letter-spacing: 1px;
   user-select: none;
+  display: flex;
+  justify-content: center;
+  align-itens: center;
+  gap: 10px;
+  >img{
+    width: 30px;
+    height: 30px;
+  }
+
 `;
