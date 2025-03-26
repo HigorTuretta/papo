@@ -10,6 +10,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthContext";
+import { FiX } from "react-icons/fi";
 
 const AddContactModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
@@ -21,51 +22,28 @@ const AddContactModal = ({ isOpen, onClose }) => {
     setStatus("");
 
     try {
-      // Verificação da autenticação
-      if (!user || !user.uid) {
-        console.error("Usuário não autenticado ou UID ausente.");
-        setStatus("Erro: Usuário não autenticado.");
-        return;
-      }
+      if (!user?.uid) return setStatus("Erro: Usuário não autenticado.");
+      if (email === user.email) return setStatus("Você não pode adicionar a si mesmo.");
 
-      console.log("Usuário autenticado. UID:", user.uid); // Log da autenticação
+      const q = query(collection(db, "users"), where("email", "==", email));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return setStatus("Usuário não encontrado.");
 
-      if (email === user.email) {
-        setStatus("Você não pode adicionar a si mesmo.");
-        return;
-      }
+      const toUid = snapshot.docs[0].id;
 
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        setStatus("Usuário não encontrado.");
-        return;
-      }
-
-      const toUser = querySnapshot.docs[0];
-      const toUid = toUser.id;
-
-      console.log("To UID:", toUid);
-
-      const friendRequestData = {
+      await addDoc(collection(db, "friendRequests"), {
         from: user.uid,
         fromEmail: user.email,
         to: toUid,
         toEmail: email,
         status: "pending",
         createdAt: Timestamp.now(),
-      };
+      });
 
-      console.log("Dados da solicitação:", friendRequestData); // Log dos dados
-      console.log("Usuário autenticado:", user?.uid);
-      await addDoc(collection(db, "friendRequests"), friendRequestData);
-
-      setStatus("Solicitação enviada!");
+      setStatus("Solicitação enviada com sucesso!");
       setEmail("");
     } catch (err) {
-      console.error("Erro ao enviar solicitação:", err);
+      console.error(err);
       setStatus("Erro ao enviar solicitação.");
     }
   };
@@ -75,18 +53,20 @@ const AddContactModal = ({ isOpen, onClose }) => {
   return (
     <Overlay>
       <Modal>
-        <h3>Adicionar Contato</h3>
+        <CloseButton onClick={onClose}><FiX size={20} /></CloseButton>
+        <Title>Adicionar Contato</Title>
+
         <form onSubmit={handleAdd}>
-          <input
-            placeholder="E-mail do contato"
+          <Input
+            placeholder="Digite o e-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <button type="submit">Enviar</button>
+          <Button type="submit">Enviar solicitação</Button>
         </form>
-        {status && <p>{status}</p>}
-        <button onClick={onClose}>Fechar</button>
+
+        {status && <Status>{status}</Status>}
       </Modal>
     </Overlay>
   );
@@ -94,49 +74,73 @@ const AddContactModal = ({ isOpen, onClose }) => {
 
 export default AddContactModal;
 
+
 const Overlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 999;
 `;
 
 const Modal = styled.div`
+  position: relative;
   background: ${({ theme }) => theme.surface};
   color: ${({ theme }) => theme.text};
   padding: 2rem;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+`;
 
-  input {
-    width: 100%;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border: 1px solid ${({ theme }) => theme.secondary};
-    border-radius: 8px;
-    background: ${({ theme }) => theme.background};
-    color: ${({ theme }) => theme.text};
-  }
+const Title = styled.h2`
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+`;
 
-  button {
-    margin-right: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: ${({ theme }) => theme.primary};
-    color: ${({ theme }) => theme.surface};
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
+const Input = styled.input`
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid ${({ theme }) => theme.secondary};
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background: ${({ theme }) => theme.background};
+  color: ${({ theme }) => theme.text};
+`;
 
-  p {
-    margin-top: 0.75rem;
-    color: ${({ theme }) => theme.info};
+const Button = styled.button`
+  width: 100%;
+  padding: 0.75rem;
+  background: ${({ theme }) => theme.primary};
+  color: ${({ theme }) => theme.surface};
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    opacity: 0.9;
   }
+`;
+
+const Status = styled.p`
+  margin-top: 1rem;
+  text-align: center;
+  color: ${({ theme }) => theme.info};
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  color: ${({ theme }) => theme.text};
+  border: none;
+  cursor: pointer;
 `;
