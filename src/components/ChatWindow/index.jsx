@@ -34,6 +34,8 @@ import isYesterday from "dayjs/plugin/isYesterday";
 import CryptoJS from "crypto-js";
 import imageCompression from "browser-image-compression";
 import { useTheme } from "../../contexts/ThemeContext";
+import messageSendSound from '../../assets/messageSend.mp3'
+import messageRecieveSound from '../../assets/messageRecieve.mp3'
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -71,17 +73,27 @@ const ChatWindow = ({ contact }) => {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+      const newMessages = msgs.filter(
+        (msg) => msg.to === user.uid && !msg.read
+      );
+
+      // 🔔 Toca som se recebeu nova mensagem
+      if (newMessages.length > 0) {
+        const audio = new Audio(messageRecieveSound);
+        audio.volume = 0.7; 
+        audio.play().catch((err) =>
+          console.warn("Erro ao tocar som de recebimento:", err)
+        );
+      }
+
       setMessages(msgs);
 
-      msgs.forEach((msg) => {
-        if (msg.to === user.uid && !msg.read) {
-          updateDoc(
-            doc(db, "conversations", conversationId, "messages", msg.id),
-            {
-              read: true,
-            }
-          );
-        }
+      // Marcar como lida
+      newMessages.forEach((msg) => {
+        updateDoc(doc(db, "conversations", conversationId, "messages", msg.id), {
+          read: true,
+        });
       });
     });
 
@@ -108,6 +120,12 @@ const ChatWindow = ({ contact }) => {
       type: "text",
     });
 
+    // 🔊 Tocar o som de envio
+    const audio = new Audio(messageSendSound);
+    audio.volume = 0.7; 
+    audio.play().catch((err) => {
+      console.warn("Erro ao tocar som:", err);
+    });
     setMessage("");
   };
 
