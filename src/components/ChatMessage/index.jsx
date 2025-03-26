@@ -1,4 +1,3 @@
-// 📁 ChatMessage/index.jsx
 import { useRef, useEffect, useState } from "react";
 import {
   Container,
@@ -12,6 +11,8 @@ import {
 import { db } from "../../services/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import CryptoJS from "crypto-js";
+import dayjs from "dayjs";
+import { MdDoneAll } from "react-icons/md";
 
 const SECRET_KEY = import.meta.env.VITE_CHAT_SECRET_KEY;
 
@@ -26,7 +27,7 @@ const decryptMessage = (encryptedText) => {
 
 const ChatMessage = ({ msg, isSender, conversationId }) => {
   if (!msg) return null;
-  const { id, text = "", type = "text", mediaUrl = "", read, reaction } = msg;
+  const { id, text = "", type = "text", mediaUrl = "", read, reaction, createdAt } = msg;
   const decryptedText = type === "text" ? decryptMessage(text) : "";
 
   const [showReactions, setShowReactions] = useState(false);
@@ -78,7 +79,7 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
   return (
     <>
       <Container $isSender={isSender}>
-        <ReactionWrapper>
+        <ReactionWrapper $isSender={isSender}>
           <Bubble
             ref={bubbleRef}
             $isSender={isSender}
@@ -96,12 +97,36 @@ const ChatMessage = ({ msg, isSender, conversationId }) => {
             {type === "audio" && mediaUrl && (
               <Media><audio controls src={mediaUrl} /></Media>
             )}
+
             {type === "video" && mediaUrl && (
               <Media><video controls src={mediaUrl} width="250" /></Media>
             )}
-            {isSender && read && (
-              <small style={{ fontSize: "0.7rem", opacity: 0.7 }}>✔✔ Lido</small>
-            )}
+
+            {/* Rodapé com hora e ícone de lido */}
+            <div style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              marginTop: "4px",
+              gap: "4px"
+            }}>
+              <small style={{
+                fontSize: "0.7rem",
+                opacity: 0.6,
+              }}>
+                {createdAt
+                  ? dayjs(createdAt.toDate()).format("HH:mm")
+                  : "Enviando..."}
+              </small>
+
+              {isSender && (
+                <MdDoneAll
+                  size={14}
+                  color={read ? "#4fc3f7" : "#999"}
+                  style={{ marginBottom: "1px" }}
+                />
+              )}
+            </div>
           </Bubble>
 
           {reaction && (

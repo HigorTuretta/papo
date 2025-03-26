@@ -12,7 +12,7 @@ import {
   DateSeparator,
   SeparatorWrapper,
   ImageButton,
-  ImageInput
+  ImageInput,
 } from "./styles";
 import {
   collection,
@@ -50,7 +50,12 @@ const ChatWindow = ({ contact }) => {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [typingTimeout, setTypingTimeout] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [contactStatus, setContactStatus] = useState("offline");
+  const [lastSeen, setLastSeen] = useState(null);
   const messagesRef = useRef(null);
+
   const { themeName } = useTheme();
 
   const conversationId =
@@ -70,9 +75,12 @@ const ChatWindow = ({ contact }) => {
 
       msgs.forEach((msg) => {
         if (msg.to === user.uid && !msg.read) {
-          updateDoc(doc(db, "conversations", conversationId, "messages", msg.id), {
-            read: true,
-          });
+          updateDoc(
+            doc(db, "conversations", conversationId, "messages", msg.id),
+            {
+              read: true,
+            }
+          );
         }
       });
     });
@@ -97,7 +105,7 @@ const ChatWindow = ({ contact }) => {
       createdAt: serverTimestamp(),
       read: false,
       reaction: "",
-      type: "text"
+      type: "text",
     });
 
     setMessage("");
@@ -126,15 +134,18 @@ const ChatWindow = ({ contact }) => {
       const data = await res.json();
       if (!data.secure_url) throw new Error("Upload falhou");
 
-      await addDoc(collection(db, "conversations", conversationId, "messages"), {
-        from: user.uid,
-        to: contact.uid,
-        createdAt: serverTimestamp(),
-        read: false,
-        type: "image",
-        mediaUrl: data.secure_url,
-        reaction: ""
-      });
+      await addDoc(
+        collection(db, "conversations", conversationId, "messages"),
+        {
+          from: user.uid,
+          to: contact.uid,
+          createdAt: serverTimestamp(),
+          read: false,
+          type: "image",
+          mediaUrl: data.secure_url,
+          reaction: "",
+        }
+      );
     } catch (err) {
       console.error("Erro ao enviar imagem:", err);
     }
@@ -159,14 +170,55 @@ const ChatWindow = ({ contact }) => {
 
   const groupedMessages = groupMessagesByDate(messages);
 
+  const handleTypingStatus = async () => {
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        typingTo: contact.uid,
+      });
+
+      if (typingTimeout) clearTimeout(typingTimeout);
+
+      const timeout = setTimeout(async () => {
+        await updateDoc(doc(db, "users", user.uid), {
+          typingTo: "",
+        });
+      }, 2000); // ← 2 segundos sem digitar
+
+      setTypingTimeout(timeout);
+    } catch (err) {
+      console.error("Erro ao atualizar typing status:", err);
+    }
+  };
+
+  useEffect(() => {
+    const ref = doc(db, "users", contact.uid);
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      const data = snap.data();
+      if (data) {
+        setContactStatus(data.status);
+        setLastSeen(data.lastSeen);
+        setIsTyping(data.typingTo === user.uid);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [contact.uid]);
+
   return (
     <Container>
-
       <Header>
         <ContactAvatar src={contact.photoURL || "/profile.jpeg"} />
         <ContactInfo>
           <ContactName>{contact.displayName || contact.email}</ContactName>
-          <span>Online</span>
+          <span style={{ fontSize: "0.85rem", color: "#ccc" }}>
+            {isTyping
+              ? "Digitando..."
+              : contactStatus === "online"
+                ? "Online"
+                : lastSeen
+                  ? `Visto por último às ${dayjs(lastSeen.toDate()).format("HH:mm")}`
+                  : "Offline"}
+          </span>
         </ContactInfo>
       </Header>
 
@@ -178,7 +230,10 @@ const ChatWindow = ({ contact }) => {
         </SeparatorWrapper>
 
         {Object.keys(groupedMessages).map((dateKey) => (
-          <div key={dateKey} style={{ position: "relative", marginTop: "1rem" }}>
+          <div
+            key={dateKey}
+            style={{ position: "relative", marginTop: "1rem" }}
+          >
             <DateSeparator>{formatDate(dayjs(dateKey))}</DateSeparator>
             {groupedMessages[dateKey].map((msg) => (
               <ChatMessage
@@ -205,7 +260,10 @@ const ChatWindow = ({ contact }) => {
         <Input
           placeholder="Digite sua mensagem..."
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            handleTypingStatus();
+          }}
         />
         <SendButton type="submit">
           <FaPaperPlane />
