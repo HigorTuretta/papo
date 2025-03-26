@@ -104,6 +104,17 @@ import {
   
     return () => unsubList.forEach((unsub) => unsub());
    }, [user, contacts]);
+
+   // Soma total das mensagens não lidas
+useEffect(() => {
+  const totalUnreads = Object.values(unreads).reduce((sum, count) => sum + count, 0);
+
+  if (totalUnreads > 0) {
+    document.title = `(${totalUnreads}) papo.`;
+  } else {
+    document.title = "papo.";
+  }
+}, [unreads]);
   
    const handleAccept = async (req) => {
     const fromRef = doc(db, "users", req.from);

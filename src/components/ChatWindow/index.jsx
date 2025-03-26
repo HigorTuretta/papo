@@ -36,7 +36,8 @@ import imageCompression from "browser-image-compression";
 import { useTheme } from "../../contexts/ThemeContext";
 import messageSendSound from '../../assets/messageSend.mp3'
 import messageRecieveSound from '../../assets/messageRecieve.mp3'
-
+import { onValue, ref as rtdbRef } from "firebase/database"; 
+import { rtdb } from "../../services/firebase";
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
@@ -54,7 +55,7 @@ const ChatWindow = ({ contact }) => {
   const [messages, setMessages] = useState([]);
   const [typingTimeout, setTypingTimeout] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [contactStatus, setContactStatus] = useState("offline");
+  const [contactStatus, setContactStatus] = useState();
   const [lastSeen, setLastSeen] = useState(null);
   const messagesRef = useRef(null);
 
@@ -209,17 +210,28 @@ const ChatWindow = ({ contact }) => {
   };
 
   useEffect(() => {
-    const ref = doc(db, "users", contact.uid);
-    const unsubscribe = onSnapshot(ref, (snap) => {
+    const userRef = doc(db, "users", contact.uid);
+    const rtdbStatusRef = rtdbRef(rtdb, `status/${contact.uid}`);
+  
+    const unsubscribeFirestore = onSnapshot(userRef, (snap) => {
       const data = snap.data();
       if (data) {
-        setContactStatus(data.status);
-        setLastSeen(data.lastSeen);
         setIsTyping(data.typingTo === user.uid);
       }
     });
-
-    return () => unsubscribe();
+  
+    const unsubscribeRTDB = onValue(rtdbStatusRef, (snap) => {
+      const data = snap.val();
+      if (data) {
+        setContactStatus(data.state);
+        setLastSeen(new Date(data.lastChanged));
+      }
+    });
+  
+    return () => {
+      unsubscribeFirestore();
+      unsubscribeRTDB();
+    };
   }, [contact.uid]);
 
   return (
@@ -229,14 +241,15 @@ const ChatWindow = ({ contact }) => {
         <ContactInfo>
           <ContactName>{contact.displayName || contact.email}</ContactName>
           <span style={{ fontSize: "0.85rem", color: "#ccc" }}>
-            {isTyping
-              ? "Digitando..."
-              : contactStatus === "online"
-                ? "Online"
-                : lastSeen
-                  ? `Visto por último às ${dayjs(lastSeen.toDate()).format("HH:mm")}`
-                  : "Offline"}
-          </span>
+  {isTyping
+    ? "Digitando..."
+    : contactStatus == "online"
+      ? "Online"
+      : lastSeen
+        ? `Visto por último às ${dayjs(lastSeen).format("HH:mm")}`
+        : ""}
+</span>
+
         </ContactInfo>
       </Header>
 

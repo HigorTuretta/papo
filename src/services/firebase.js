@@ -12,6 +12,13 @@ import {
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getMessaging, onMessage } from "firebase/messaging";
+import {
+  getDatabase,
+  ref as rtdbRef,
+  onDisconnect,
+  set as rtdbSet,
+  onValue,
+} from "firebase/database"; 
 
 // 🔐 Config Firebase
 const firebaseConfig = {
@@ -23,7 +30,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// 🔥 Inicializa
+// 🔥 Inicializa app
 const app = initializeApp(firebaseConfig);
 
 // 🔐 Auth
@@ -39,6 +46,9 @@ const db = initializeFirestore(app, {
 // ☁️ Storage
 const storage = getStorage(app);
 
+// 🌐 Realtime Database
+const rtdb = getDatabase(app);
+
 // 📲 Messaging (FCM)
 export const messaging = getMessaging(app);
 
@@ -47,4 +57,15 @@ onMessage(messaging, (payload) => {
   console.log("🔥 Notificação recebida enquanto o app estava aberto:", payload);
 });
 
-export { auth, db, storage, provider, serverTimestamp };
+export {
+  auth,
+  db,
+  storage,
+  provider,
+  serverTimestamp,
+  rtdb,
+  rtdbRef,
+  onDisconnect,
+  rtdbSet,
+  onValue,
+};
