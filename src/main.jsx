@@ -5,7 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import GlobalStyle from "./styles/GlobalStyle";
 import { BrowserRouter as Router } from "react-router-dom";
-
+import { ToastContainer } from "react-toastify";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Router>
@@ -13,6 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <ThemeProvider>
           <GlobalStyle />
           <App />
+          <ToastContainer/>
         </ThemeProvider>
       </AuthProvider>
     </Router>

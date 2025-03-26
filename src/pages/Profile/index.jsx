@@ -21,6 +21,7 @@ const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [photoURL, setPhotoURL] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,12 +38,51 @@ const Profile = () => {
     fetchProfile();
   }, [user]);
 
+  const updatePhotoEverywhere = async (url) => {
+    try {
+      const userRef = doc(db, "users", user.uid);
+
+      // Atualiza Firestore principal
+      await updateDoc(userRef, { photoURL: url });
+
+      // Atualiza seu próprio contato
+      await setDoc(doc(db, "contacts", user.uid, "list", user.uid), {
+        uid: user.uid,
+        displayName,
+        photoURL: url,
+        email: user.email,
+      });
+
+      // Atualiza nas listas dos outros
+      const contactsSnapshot = await getDocs(collectionGroup(db, "list"));
+      const batch = writeBatch(db);
+
+      contactsSnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const refPath = docSnap.ref.path;
+
+        if (data.uid === user.uid) {
+          batch.update(doc(db, refPath), {
+            photoURL: url,
+          });
+        }
+      });
+
+      await batch.commit();
+    } catch (err) {
+      console.error("Erro ao atualizar imagem nas listas:", err);
+      toast.error("Erro ao atualizar imagem nos contatos.");
+    }
+  };
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const toastId = toast.loading("Enviando imagem...");
+    setUploading(true);
+
     try {
-      setLoading(true);
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1024,
@@ -60,61 +100,83 @@ const Profile = () => {
       });
 
       const data = await res.json();
+      if (!data.secure_url) throw new Error("Upload falhou");
+
       setPhotoURL(data.secure_url);
+      await updatePhotoEverywhere(data.secure_url);
+
+      toast.update(toastId, {
+        render: "Imagem atualizada com sucesso!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
     } catch (err) {
-      toast.error("Erro ao fazer upload da imagem.");
       console.error(err);
+      toast.update(toastId, {
+        render: "Erro ao enviar imagem.",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const toastId = toast.loading("Salvando perfil...");
+    setLoading(true);
+
     try {
       const userRef = doc(db, "users", user.uid);
-  
-      // Atualiza o perfil principal
-      await updateDoc(userRef, {
-        displayName,
-        photoURL,
-      });
-  
-      // Atualiza o próprio contato (em sua lista de contatos, se existir)
+
+      await updateDoc(userRef, { displayName });
+
+      // Atualiza seu próprio contato
       await setDoc(doc(db, "contacts", user.uid, "list", user.uid), {
         uid: user.uid,
         displayName,
         photoURL,
         email: user.email,
       });
-  
-      // Busca todos os documentos da subcoleção "list" que possuem este usuário
+
+      // Atualiza nas listas dos outros
       const contactsSnapshot = await getDocs(collectionGroup(db, "list"));
-  
       const batch = writeBatch(db);
-  
+
       contactsSnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const refPath = docSnap.ref.path;
-  
-        // Se alguém tiver esse usuário como contato
+
         if (data.uid === user.uid) {
           batch.update(doc(db, refPath), {
             displayName,
-            photoURL,
           });
         }
       });
-  
+
       await batch.commit();
-  
-      toast.success("Perfil atualizado com sucesso!");
+
+      toast.update(toastId, {
+        render: "Perfil atualizado com sucesso!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
-      toast.error("Erro ao atualizar perfil.");
+      toast.update(toastId, {
+        render: "Erro ao atualizar perfil.",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
     <Container>
@@ -127,7 +189,7 @@ const Profile = () => {
         </Header>
 
         <div style={{ position: "relative", alignSelf: "center" }}>
-          <Avatar src={photoURL || "/default-avatar.png"} alt="avatar" />
+          <Avatar src={photoURL || "/profile.jpeg"} alt="avatar" />
           <UploadLabel htmlFor="upload-photo">
             <FaCamera />
           </UploadLabel>
@@ -136,6 +198,7 @@ const Profile = () => {
             type="file"
             accept="image/*"
             onChange={handleImageChange}
+            disabled={loading || uploading}
           />
         </div>
 
@@ -144,9 +207,10 @@ const Profile = () => {
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Nome de exibição"
+          disabled={loading || uploading}
         />
 
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || uploading}>
           {loading ? "Salvando..." : "Salvar"}
         </Button>
       </Form>

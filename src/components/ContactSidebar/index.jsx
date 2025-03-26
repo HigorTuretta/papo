@@ -74,27 +74,48 @@ const ContactSidebar = ({ onSelectContact }) => {
     if (!user) return;
 
     const ref = collection(db, "contacts", user.uid, "list");
-    const unsubContacts = onSnapshot(ref, async (snapshot) => {
-      const list = snapshot.docs.map((doc) => doc.data());
+    const unsubContacts = onSnapshot(ref, (snapshot) => {
+      const unsubList = [];
+      const contactDocs = snapshot.docs;
 
-      const enriched = await Promise.all(
-        list.map(async (c) => {
-          const conversationId =
-            user.uid < c.uid ? `${user.uid}_${c.uid}` : `${c.uid}_${user.uid}`;
+      Promise.all(
+        contactDocs.map(async (docSnap) => {
+          const c = docSnap.data();
+          const contactRef = doc(db, "users", c.uid);
 
-          const convoRef = doc(db, "conversations", conversationId);
-          const convoSnap = await getDoc(convoRef);
-          const lastMessageAt = convoSnap.exists()
-            ? convoSnap.data().lastMessageAt?.toMillis?.() || 0
-            : 0;
+          return new Promise((resolve) => {
+            const unsub = onSnapshot(contactRef, async (userSnap) => {
+              const userData = userSnap.data();
 
-          return { ...c, lastMessageAt };
+              const conversationId =
+                user.uid < c.uid ? `${user.uid}_${c.uid}` : `${c.uid}_${user.uid}`;
+
+              const convoRef = doc(db, "conversations", conversationId);
+              const convoSnap = await getDoc(convoRef);
+              const lastMessageAt = convoSnap.exists()
+                ? convoSnap.data().lastMessageAt?.toMillis?.() || 0
+                : 0;
+
+              resolve({
+                uid: c.uid,
+                displayName: userData?.displayName || c.email,
+                photoURL: userData?.photoURL || "",
+                email: c.email,
+                lastMessageAt,
+              });
+            });
+
+            unsubList.push(unsub);
+          });
         })
-      );
+      ).then((enrichedContacts) => {
+        const sorted = enrichedContacts.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
+        setContacts(sorted);
+      });
 
-      const sorted = enriched.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
-      setContacts(sorted);
+      return () => unsubList.forEach((unsub) => unsub());
     });
+
 
     return () => unsubContacts();
   }, [user]);

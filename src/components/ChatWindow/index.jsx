@@ -36,8 +36,9 @@ import imageCompression from "browser-image-compression";
 import { useTheme } from "../../contexts/ThemeContext";
 import messageSendSound from '../../assets/messageSend.mp3'
 import messageRecieveSound from '../../assets/messageRecieve.mp3'
-import { onValue, ref as rtdbRef } from "firebase/database"; 
+import { onValue, ref as rtdbRef } from "firebase/database";
 import { rtdb } from "../../services/firebase";
+
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
@@ -57,8 +58,9 @@ const ChatWindow = ({ contact }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [contactStatus, setContactStatus] = useState();
   const [lastSeen, setLastSeen] = useState(null);
-  const messagesRef = useRef(null);
+  const [contactData, setContactData] = useState(contact);
 
+  const messagesRef = useRef(null);
   const { themeName } = useTheme();
 
   const conversationId =
@@ -79,10 +81,9 @@ const ChatWindow = ({ contact }) => {
         (msg) => msg.to === user.uid && !msg.read
       );
 
-      // 🔔 Toca som se recebeu nova mensagem
       if (newMessages.length > 0) {
         const audio = new Audio(messageRecieveSound);
-        audio.volume = 0.7; 
+        audio.volume = 0.7;
         audio.play().catch((err) =>
           console.warn("Erro ao tocar som de recebimento:", err)
         );
@@ -90,7 +91,6 @@ const ChatWindow = ({ contact }) => {
 
       setMessages(msgs);
 
-      // Marcar como lida
       newMessages.forEach((msg) => {
         updateDoc(doc(db, "conversations", conversationId, "messages", msg.id), {
           read: true,
@@ -121,9 +121,13 @@ const ChatWindow = ({ contact }) => {
       type: "text",
     });
 
-    // 🔊 Tocar o som de envio
+    // ⬇ Atualiza o campo lastMessageAt da conversa principal
+    await updateDoc(doc(db, "conversations", conversationId), {
+      lastMessageAt: serverTimestamp(),
+    });
+
     const audio = new Audio(messageSendSound);
-    audio.volume = 0.7; 
+    audio.volume = 0.7;
     audio.play().catch((err) => {
       console.warn("Erro ao tocar som:", err);
     });
@@ -165,6 +169,10 @@ const ChatWindow = ({ contact }) => {
           reaction: "",
         }
       );
+
+      await updateDoc(doc(db, "conversations", conversationId), {
+        lastMessageAt: serverTimestamp(),
+      });
     } catch (err) {
       console.error("Erro ao enviar imagem:", err);
     }
@@ -201,7 +209,7 @@ const ChatWindow = ({ contact }) => {
         await updateDoc(doc(db, "users", user.uid), {
           typingTo: "",
         });
-      }, 2000); // ← 2 segundos sem digitar
+      }, 2000);
 
       setTypingTimeout(timeout);
     } catch (err) {
@@ -212,14 +220,15 @@ const ChatWindow = ({ contact }) => {
   useEffect(() => {
     const userRef = doc(db, "users", contact.uid);
     const rtdbStatusRef = rtdbRef(rtdb, `status/${contact.uid}`);
-  
+
     const unsubscribeFirestore = onSnapshot(userRef, (snap) => {
       const data = snap.data();
       if (data) {
         setIsTyping(data.typingTo === user.uid);
+        setContactData(data)
       }
     });
-  
+
     const unsubscribeRTDB = onValue(rtdbStatusRef, (snap) => {
       const data = snap.val();
       if (data) {
@@ -227,7 +236,7 @@ const ChatWindow = ({ contact }) => {
         setLastSeen(new Date(data.lastChanged));
       }
     });
-  
+
     return () => {
       unsubscribeFirestore();
       unsubscribeRTDB();
@@ -237,19 +246,18 @@ const ChatWindow = ({ contact }) => {
   return (
     <Container>
       <Header>
-        <ContactAvatar src={contact.photoURL || "/profile.jpeg"} />
+        <ContactAvatar src={contactData.photoURL || "/profile.jpeg"} />
         <ContactInfo>
-          <ContactName>{contact.displayName || contact.email}</ContactName>
+          <ContactName>{contactData.displayName || contactData.email}</ContactName>
           <span style={{ fontSize: "0.85rem", color: "#ccc" }}>
-  {isTyping
-    ? "Digitando..."
-    : contactStatus == "online"
-      ? "Online"
-      : lastSeen
-        ? `Visto por último às ${dayjs(lastSeen).format("HH:mm")}`
-        : ""}
-</span>
-
+            {isTyping
+              ? "Digitando..."
+              : contactStatus === "online"
+                ? "Online"
+                : lastSeen
+                  ? `Visto por último às ${dayjs(lastSeen).format("HH:mm")}`
+                  : ""}
+          </span>
         </ContactInfo>
       </Header>
 
@@ -261,10 +269,7 @@ const ChatWindow = ({ contact }) => {
         </SeparatorWrapper>
 
         {Object.keys(groupedMessages).map((dateKey) => (
-          <div
-            key={dateKey}
-            style={{ position: "relative", marginTop: "1rem" }}
-          >
+          <div key={dateKey} style={{ position: "relative", marginTop: "1rem" }}>
             <DateSeparator>{formatDate(dayjs(dateKey))}</DateSeparator>
             {groupedMessages[dateKey].map((msg) => (
               <ChatMessage
