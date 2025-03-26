@@ -11,3 +11,11 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
 `;
+
+export const HelloArea = styled.div`
+  display: flex;
+  justify-content:center;
+  align-itens: center;
+  flex: 1;
+  flex-direction:column;
+`

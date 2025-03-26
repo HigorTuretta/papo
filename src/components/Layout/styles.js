@@ -10,7 +10,6 @@ export const SidebarWrapper = styled.div`
   width: 300px;
   max-width: 100%;
   background: ${({ theme }) => theme.surface};
-  border-right: 1px solid ${({ theme }) => theme.secondary};
   display: ${({ $visible }) => ($visible ? "block" : "none")};
 
   @media (max-width: 768px) {
@@ -85,3 +84,19 @@ export const CloseSidebarButton = styled.button`
     z-index: 30;
   }
 `;
+
+export const HelloArea = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  gap: 1rem;
+
+  > div {
+    width: 30%;
+  }
+`;
+

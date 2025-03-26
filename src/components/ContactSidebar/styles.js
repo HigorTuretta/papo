@@ -110,7 +110,6 @@ export const RequestButtons = styled.div`
 `;
 
 export const Footer = styled.div`
- border-top: 1px solid ${({ theme }) => theme.secondary};
  background: ${({ theme }) => theme.surface};
  transition: all 0.3s ease;
  padding: 0.5rem 1rem;

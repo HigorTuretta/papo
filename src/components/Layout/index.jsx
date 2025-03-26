@@ -5,10 +5,13 @@ import {
   ContentWrapper,
   ToggleSidebarButton,
   Backdrop,
-  CloseSidebarButton 
+  CloseSidebarButton,
+  HelloArea
 } from "./styles";
 import ContactSidebar from "../ContactSidebar";
 import ChatWindow from "../ChatWindow";
+import HomeAnim from '../../assets/Home.json'
+import Lottie from "lottie-react";
 
 const Layout = ({ selectedContact, onSelectContact }) => {
   const [showSidebar, setShowSidebar] = useState(window.innerWidth > 768);
@@ -28,7 +31,7 @@ const Layout = ({ selectedContact, onSelectContact }) => {
   return (
     <Wrapper>
       <SidebarWrapper $visible={showSidebar}>
-      <CloseSidebarButton onClick={() => setShowSidebar(false)}>✖</CloseSidebarButton>
+        <CloseSidebarButton onClick={() => setShowSidebar(false)}>✖</CloseSidebarButton>
         <ContactSidebar
           onSelectContact={(c) => {
             onSelectContact(c);
@@ -47,7 +50,12 @@ const Layout = ({ selectedContact, onSelectContact }) => {
         {selectedContact ? (
           <ChatWindow contact={selectedContact} />
         ) : (
-          <p style={{ padding: "1.5rem 5rem" }}>Selecione um contato para iniciar uma conversa</p>
+          <HelloArea>
+            <div>
+              <Lottie animationData={HomeAnim} loop={true} />
+            </div>
+            <p>Selecione um contato para começar a conversar</p>
+          </HelloArea>
         )}
       </ContentWrapper>
 
