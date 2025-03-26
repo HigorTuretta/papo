@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
 } from "firebase/auth";
-
+import { requestNotificationPermission } from "../services/fcm";
 import { db } from "../services/firebase";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
@@ -49,10 +49,37 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      requestNotificationPermission(user.uid);
+      if (user && window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ uid: user.uid }));
+      }
+    }
+  }, [user]);
+
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
   const register = (email, password) => createUserWithEmailAndPassword(auth, password);
-  const loginWithGoogle = () => signInWithPopup(auth, provider);
+  const loginWithGoogle = async () => {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+  
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+  
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || "",
+        createdAt: serverTimestamp(),
+      });
+    }
+  
+    return result;
+  };
   const logout = () => signOut(auth);
 
   return (

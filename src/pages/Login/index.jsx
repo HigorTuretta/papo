@@ -24,6 +24,10 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const isInWebView = () => {
+    return window.ReactNativeWebView !== undefined;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -71,10 +75,12 @@ const Login = () => {
             required
           />
           <Button type="submit">Entrar</Button>
-          <GoogleButton type="button" onClick={handleGoogleLogin}>
-            <FaGoogle />
-            Entrar com Google
-          </GoogleButton>
+          {/* {!isInWebView() && (
+            <GoogleButton type="button" onClick={loginWithGoogle}>
+              <FaGoogle />
+              Entrar com Google
+            </GoogleButton>
+          )} */}
           <LinkText>
             Ainda não tem uma conta? <Link to="/register">Criar agora!</Link>
           </LinkText>

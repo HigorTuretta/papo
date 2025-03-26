@@ -18,3 +18,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </Router>
   </React.StrictMode>
 );
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("/firebase-messaging-sw.js")
+    .then((registration) => {
+      console.log("✅ Service Worker registrado", registration);
+    })
+    .catch((err) => {
+      console.error("Erro ao registrar SW:", err);
+    });
+}
