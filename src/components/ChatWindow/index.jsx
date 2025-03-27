@@ -111,29 +111,28 @@ const ChatWindow = ({ contact }) => {
     e.preventDefault();
     if (message.trim() === "") return;
 
+    const msgToSend = message;
+    setMessage(""); 
+
     await addDoc(collection(db, "conversations", conversationId, "messages"), {
       from: user.uid,
       to: contact.uid,
-      text: encryptMessage(message),
+      text: encryptMessage(msgToSend),
       createdAt: serverTimestamp(),
       read: false,
       reaction: "",
       type: "text",
     });
 
-    // ⬇ Atualiza o campo lastMessageAt da conversa principal
     await updateDoc(doc(db, "conversations", conversationId), {
       lastMessageAt: serverTimestamp(),
     });
 
-    setMessage("");
-    
     const audio = new Audio(messageSendSound);
     audio.volume = 0.7;
     audio.play().catch((err) => {
       console.warn("Erro ao tocar som:", err);
     });
-   
   };
 
   const handleImageUpload = async (e) => {
