@@ -63,20 +63,6 @@ export const Messages = styled.div`
   background-repeat: repeat;
   background-attachment: fixed;
 
-  &::before {
-    content: "";
-    position: sticky;
-    top: 0;
-    height: 30px;
-    background: linear-gradient(
-      to bottom,
-      ${({ theme }) => theme.background} 0%,
-      transparent 100%
-    );
-    pointer-events: none;
-    z-index: 2;
-  }
-
   &::-webkit-scrollbar {
     width: 8px;
   }
