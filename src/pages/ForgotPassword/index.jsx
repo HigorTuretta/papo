@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import LogoImg from "../../assets/Logo.png";
+import LogoImg from "../../assets/Logo 5.png";
 
 const ForgotPassword = () => {
   const { resetPassword } = useAuth();
@@ -34,10 +34,9 @@ const ForgotPassword = () => {
   return (
     <Container>
       <CenterBox>
-        <Slogan>SÓ MANDAR O</Slogan>
         <Logo>
           <img src={LogoImg} alt="logo" />
-          <span>papo.</span>
+          <span>Papruu</span>
         </Logo>
 
         {emailSent ? (

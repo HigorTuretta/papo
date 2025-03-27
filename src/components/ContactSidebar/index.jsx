@@ -14,7 +14,7 @@ import {
   ScrollArea,
 } from "./styles";
 
-import LogoImg from "../../assets/Logo.png";
+import LogoImg from "../../assets/Logo 5.png";
 import { useEffect, useState } from "react";
 import { db } from "../../services/firebase";
 import { useAuth } from "../../contexts/AuthContext";
@@ -158,7 +158,7 @@ const ContactSidebar = ({ onSelectContact }) => {
       0
     );
 
-    document.title = totalUnreads > 0 ? `(${totalUnreads}) papo.` : "papo.";
+    document.title = totalUnreads > 0 ? `(${totalUnreads}) Papruu.` : "Papruu";
   }, [unreads]);
 
   const handleAccept = async (req) => {
@@ -259,7 +259,7 @@ const ContactSidebar = ({ onSelectContact }) => {
         <FooterBottom>
           <Logo>
             <img src={LogoImg} />
-            papo.
+            <p>Papruu</p>
           </Logo>
           <Attribution>
             Powered by Turetta <br /> v{version}

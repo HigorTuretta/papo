@@ -5,7 +5,7 @@ import {
 } from "./styles";
 import { useAuth } from "../../contexts/AuthContext";
 import {
-  doc, getDoc, getDocs, updateDoc, collectionGroup, writeBatch, setDoc 
+  doc, getDoc, getDocs, updateDoc, collectionGroup, writeBatch, setDoc
 } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { toast } from "react-toastify";
@@ -180,6 +180,7 @@ const Profile = () => {
 
   return (
     <Container>
+
       <Form onSubmit={handleSave}>
         <Header>
           <BackButton type="button" onClick={() => navigate("/")}>
@@ -188,7 +189,7 @@ const Profile = () => {
           <Title>Meu Perfil</Title>
         </Header>
 
-        <div style={{ position: "relative", alignSelf: "center" }}>
+        <div style={{ position: "relative", alignSelf: "center", display: "flex", justifyContent: "center" }}>
           <Avatar src={photoURL || "/profile.jpeg"} alt="avatar" />
           <UploadLabel htmlFor="upload-photo">
             <FaCamera />

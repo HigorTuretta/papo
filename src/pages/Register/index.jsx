@@ -16,7 +16,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../../services/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import LogoImg from "../../assets/Logo.png";
+import LogoImg from "../../assets/Logo 5.png";
 
 const Register = () => {
   const { register } = useAuth();
@@ -45,10 +45,9 @@ const Register = () => {
   return (
     <Container>
       <CenterBox>
-        <Slogan>SÓ MANDAR O </Slogan>
         <Logo>
           <img src={LogoImg} alt="logo" />
-          <span>papo.</span>
+          <span>Papruu</span>
         </Logo>
 
         <FormCard onSubmit={handleRegister}>

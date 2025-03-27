@@ -1,9 +1,14 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
+  position: relative;
   height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #0d1b2a, #1b263b);
+  background: ${(props) =>
+    props.theme.name === 'dark'
+      ? 'linear-gradient(135deg, #000000, #1a1a1a)'
+      : 'linear-gradient(135deg, #F5F5F5, #FFFFFF)'};
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,23 +38,23 @@ export const Logo = styled.div`
   align-items: center;
   gap: 10px;
   margin-bottom: 3rem;
+  flex-direction: column;
 
   img {
-    width: 38px;
-    height: 38px;
+    width: 128px;
   }
 
   span {
     font-size: 2rem;
     font-weight: 900;
-    color: #ffffff;
+    color: ${(props) => props.theme.text};
     letter-spacing: 1px;
-    text-transform: lowercase;
+    font-family: 'LogoFont', sans-serif;
   }
 `;
 
 export const Slogan = styled.h3`
-  color: #ffffffcc;
+  color: ${(props) => props.theme.text}cc;
   font-size: 1rem;
   letter-spacing: 3px;
   text-align: center;
@@ -72,30 +77,30 @@ export const FormCard = styled.form`
 `;
 
 export const Title = styled.h2`
-  color: #ffffff;
+  color: ${(props) => props.theme.text};
   font-size: 1.6rem;
   text-align: center;
 `;
 
 export const Input = styled.input`
   padding: 0.9rem 1rem;
-  background: #111a22;
-  color: #ffffff;
-  border: 1px solid #778da955;
+  background: ${(props) => props.theme.surface};
+  color: ${(props) => props.theme.text};
+  border: 1px solid ${(props) => props.theme.accent}55;
   border-radius: 12px;
   font-size: 1rem;
   outline: none;
   transition: border 0.3s;
 
   &:focus {
-    border-color: #ffffff;
+    border-color: ${(props) => props.theme.accent};
   }
 `;
 
 export const Button = styled.button`
   padding: 0.9rem;
-  background: #778da9;
-  color: #ffffff;
+  background: ${(props) => props.theme.primary};
+  color: #F5F5F5;
   font-size: 1rem;
   font-weight: bold;
   border: none;
@@ -104,7 +109,7 @@ export const Button = styled.button`
   transition: box-shadow 0.3s ease;
 
   &:hover {
-    box-shadow: 0 0 12px #778da9aa;
+    box-shadow: 0 0 12px ${(props) => props.theme.primary}aa;
   }
 `;
 
@@ -124,10 +129,10 @@ export const GoogleButton = styled(Button)`
 export const LinkText = styled.p`
   text-align: center;
   font-size: 0.9rem;
-  color: #ccc;
+  color: ${(props) => props.theme.text}99;
 
   a {
-    color: #ffffff;
+    color: ${(props) => props.theme.text};
     font-weight: bold;
     text-decoration: none;
 

@@ -16,7 +16,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaGoogle } from "react-icons/fa";
-import LogoImg from "../../assets/Logo.png";
+import LogoImg from "../../assets/Logo 5.png";
+
 
 const Login = () => {
   const { login, loginWithGoogle } = useAuth();
@@ -48,14 +49,14 @@ const Login = () => {
       toast.error("Erro ao entrar com o Google.");
     }
   };
-
+ 
   return (
     <Container>
+
       <CenterBox>
-        <Slogan>SÓ MANDAR O </Slogan>
         <Logo>
           <img src={LogoImg} alt="logo" />
-          <span>papo.</span>
+          <span>Papruu</span>
         </Logo>
 
         <FormCard onSubmit={handleLogin}>

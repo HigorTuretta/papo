@@ -97,6 +97,11 @@ export const HelloArea = styled.div`
 
   > div {
     width: 30%;
+
+    >img{
+      width: 50%;
+      min-width: 150px;
+    }
   }
 `;
 

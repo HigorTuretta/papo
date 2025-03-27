@@ -1,6 +1,8 @@
 // 📁 ContactSidebar/styles.js
 import styled from "styled-components";
 
+import font from '../../assets/fonts/F25_Bank_Printer.ttf'
+
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -215,20 +217,23 @@ export const Attribution = styled.span`
 `;
 
 export const Logo = styled.div`
-  font-family: 'Segoe UI', sans-serif;
   font-weight: 900;
   font-size: 1.2rem;
   color: ${({ theme }) => theme.primary};
-  text-transform: lowercase;
-  letter-spacing: 1px;
   user-select: none;
   display: flex;
   justify-content: center;
-  align-itens: center;
+  align-items: center;
   gap: 10px;
-  >img{
-    width: 30px;
-    height: 30px;
+
+  > p {
+    font-family: 'LogoFont', sans-serif;
+    font-size: 1.5rem;
   }
 
+  > img {
+    width: 35px;
+    height: 35px;
+  }
 `;
+

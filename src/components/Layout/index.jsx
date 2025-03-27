@@ -12,6 +12,7 @@ import ContactSidebar from "../ContactSidebar";
 import ChatWindow from "../ChatWindow";
 import HomeAnim from '../../assets/Home.json'
 import Lottie from "lottie-react";
+import Logo from '../../assets/Logo 5.png'
 
 const Layout = ({ selectedContact, onSelectContact }) => {
   const [showSidebar, setShowSidebar] = useState(window.innerWidth > 768);
@@ -51,10 +52,11 @@ const Layout = ({ selectedContact, onSelectContact }) => {
           <ChatWindow contact={selectedContact} />
         ) : (
           <HelloArea>
+            
             <div>
-              <Lottie animationData={HomeAnim} loop={true} />
+              <img src={Logo} alt="Logo do app"/>
             </div>
-            <p>Selecione um contato para começar a conversar</p>
+            <p>Selecione um contato para começar a pruu-pear 👈</p>
           </HelloArea>
         )}
       </ContentWrapper>
