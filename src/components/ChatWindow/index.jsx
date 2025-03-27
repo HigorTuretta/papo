@@ -126,12 +126,14 @@ const ChatWindow = ({ contact }) => {
       lastMessageAt: serverTimestamp(),
     });
 
+    setMessage("");
+    
     const audio = new Audio(messageSendSound);
     audio.volume = 0.7;
     audio.play().catch((err) => {
       console.warn("Erro ao tocar som:", err);
     });
-    setMessage("");
+   
   };
 
   const handleImageUpload = async (e) => {
