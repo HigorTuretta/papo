@@ -34,8 +34,8 @@ import isYesterday from "dayjs/plugin/isYesterday";
 import CryptoJS from "crypto-js";
 import imageCompression from "browser-image-compression";
 import { useTheme } from "../../contexts/ThemeContext";
-import messageSendSound from '../../assets/messageSend.mp3'
-import messageRecieveSound from '../../assets/messageRecieve.mp3'
+import messageSendSound from "../../assets/messageSend.mp3";
+import messageRecieveSound from "../../assets/messageRecieve.mp3";
 import { onValue, ref as rtdbRef } from "firebase/database";
 import { rtdb } from "../../services/firebase";
 import NotificationBanner from "../NotificationBanner";
@@ -60,26 +60,28 @@ const ChatWindow = ({ contact }) => {
   const [contactStatus, setContactStatus] = useState();
   const [lastSeen, setLastSeen] = useState(null);
   const [contactData, setContactData] = useState(contact);
-
   const messagesRef = useRef(null);
   const { themeName } = useTheme();
 
-  const conversationId =
-    user.uid < contact.uid
-      ? `${user.uid}_${contact.uid}`
-      : `${contact.uid}_${user.uid}`;
+  const isGroupChat = contact?.isGroup;
+  const conversationId = isGroupChat
+    ? contact.id
+    : user.uid < contact.uid
+    ? `${user.uid}_${contact.uid}`
+    : `${contact.uid}_${user.uid}`;
+
+  const messageCollectionRef = isGroupChat
+    ? collection(db, "groups", conversationId, "messages")
+    : collection(db, "conversations", conversationId, "messages");
 
   useEffect(() => {
-    const q = query(
-      collection(db, "conversations", conversationId, "messages"),
-      orderBy("createdAt", "asc")
-    );
+    const q = query(messageCollectionRef, orderBy("createdAt", "asc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
       const newMessages = msgs.filter(
-        (msg) => msg.to === user.uid && !msg.read
+        (msg) => !isGroupChat && msg.to === user.uid && !msg.read
       );
 
       if (newMessages.length > 0) {
@@ -92,15 +94,20 @@ const ChatWindow = ({ contact }) => {
 
       setMessages(msgs);
 
-      newMessages.forEach((msg) => {
-        updateDoc(doc(db, "conversations", conversationId, "messages", msg.id), {
-          read: true,
+      if (!isGroupChat) {
+        newMessages.forEach((msg) => {
+          updateDoc(
+            doc(db, "conversations", conversationId, "messages", msg.id),
+            {
+              read: true,
+            }
+          );
         });
-      });
+      }
     });
 
     return () => unsubscribe();
-  }, [conversationId, user.uid]);
+  }, [conversationId, user.uid, isGroupChat]);
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -113,11 +120,11 @@ const ChatWindow = ({ contact }) => {
     if (message.trim() === "") return;
 
     const msgToSend = message;
-    setMessage(""); 
+    setMessage("");
 
-    await addDoc(collection(db, "conversations", conversationId, "messages"), {
+    await addDoc(messageCollectionRef, {
       from: user.uid,
-      to: contact.uid,
+      ...(isGroupChat ? {} : { to: contact.uid }),
       text: encryptMessage(msgToSend),
       createdAt: serverTimestamp(),
       read: false,
@@ -125,9 +132,11 @@ const ChatWindow = ({ contact }) => {
       type: "text",
     });
 
-    await updateDoc(doc(db, "conversations", conversationId), {
-      lastMessageAt: serverTimestamp(),
-    });
+    if (!isGroupChat) {
+      await updateDoc(doc(db, "conversations", conversationId), {
+        lastMessageAt: serverTimestamp(),
+      });
+    }
 
     const audio = new Audio(messageSendSound);
     audio.volume = 0.7;
@@ -159,22 +168,21 @@ const ChatWindow = ({ contact }) => {
       const data = await res.json();
       if (!data.secure_url) throw new Error("Upload falhou");
 
-      await addDoc(
-        collection(db, "conversations", conversationId, "messages"),
-        {
-          from: user.uid,
-          to: contact.uid,
-          createdAt: serverTimestamp(),
-          read: false,
-          type: "image",
-          mediaUrl: data.secure_url,
-          reaction: "",
-        }
-      );
-
-      await updateDoc(doc(db, "conversations", conversationId), {
-        lastMessageAt: serverTimestamp(),
+      await addDoc(messageCollectionRef, {
+        from: user.uid,
+        ...(isGroupChat ? {} : { to: contact.uid }),
+        createdAt: serverTimestamp(),
+        read: false,
+        type: "image",
+        mediaUrl: data.secure_url,
+        reaction: "",
       });
+
+      if (!isGroupChat) {
+        await updateDoc(doc(db, "conversations", conversationId), {
+          lastMessageAt: serverTimestamp(),
+        });
+      }
     } catch (err) {
       console.error("Erro ao enviar imagem:", err);
     }
@@ -200,6 +208,8 @@ const ChatWindow = ({ contact }) => {
   const groupedMessages = groupMessagesByDate(messages);
 
   const handleTypingStatus = async () => {
+    if (isGroupChat) return;
+
     try {
       await updateDoc(doc(db, "users", user.uid), {
         typingTo: contact.uid,
@@ -220,6 +230,8 @@ const ChatWindow = ({ contact }) => {
   };
 
   useEffect(() => {
+    if (isGroupChat) return;
+
     const userRef = doc(db, "users", contact.uid);
     const rtdbStatusRef = rtdbRef(rtdb, `status/${contact.uid}`);
 
@@ -227,7 +239,7 @@ const ChatWindow = ({ contact }) => {
       const data = snap.data();
       if (data) {
         setIsTyping(data.typingTo === user.uid);
-        setContactData(data)
+        setContactData(data);
       }
     });
 
@@ -243,28 +255,40 @@ const ChatWindow = ({ contact }) => {
       unsubscribeFirestore();
       unsubscribeRTDB();
     };
-  }, [contact.uid]);
+  }, [contact.uid, isGroupChat]);
 
   return (
     <Container>
-     
       <Header>
-        <ContactAvatar src={contactData.photoURL || "/profile.jpeg"} />
+        <ContactAvatar
+          src={
+            isGroupChat
+              ? contact.imageURL
+              : contactData.photoURL || "/profile.jpeg"
+          }
+        />
         <ContactInfo>
-          <ContactName>{contactData.displayName || contactData.email}</ContactName>
-          <span style={{ fontSize: "0.85rem", color: "#ccc" }}>
-            {isTyping
-              ? "Digitando..."
-              : contactStatus === "online"
+          <ContactName>
+            {isGroupChat
+              ? contact.name
+              : contactData.displayName || contactData.email}
+          </ContactName>
+          {!isGroupChat && (
+            <span style={{ fontSize: "0.85rem", color: "#ccc" }}>
+              {isTyping
+                ? "Digitando..."
+                : contactStatus === "online"
                 ? "Online"
                 : lastSeen
-                  ? `Visto por último às ${dayjs(lastSeen).format("HH:mm")}`
-                  : ""}
-          </span>
+                ? `Visto por último às ${dayjs(lastSeen).format("HH:mm")}`
+                : ""}
+            </span>
+          )}
         </ContactInfo>
-        
       </Header>
+
       <NotificationBanner />
+
       <Messages ref={messagesRef} $themeName={themeName}>
         <SeparatorWrapper>
           <DateSeparator>
@@ -281,6 +305,7 @@ const ChatWindow = ({ contact }) => {
                 msg={msg}
                 isSender={msg.from === user.uid}
                 conversationId={conversationId}
+                isGroup={isGroupChat}
               />
             ))}
           </div>

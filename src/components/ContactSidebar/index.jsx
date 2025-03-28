@@ -13,7 +13,7 @@ import {
   RequestButtons,
   ScrollArea,
 } from "./styles";
-
+import CreateGroupModal from "../CreateGroupModal";
 import LogoImg from "../../assets/Logo 5.png";
 import { useEffect, useState } from "react";
 import { db } from "../../services/firebase";
@@ -27,6 +27,7 @@ import {
   updateDoc,
   getDoc,
   setDoc,
+  getDocs
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle";
@@ -37,6 +38,7 @@ import {
   FiLogOut,
   FiChevronDown,
   FiChevronUp,
+  FiUsers,
 } from "react-icons/fi";
 import { version } from "../../../package.json";
 
@@ -47,6 +49,9 @@ const ContactSidebar = ({ onSelectContact }) => {
   const [requests, setRequests] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [isFooterOpen, setIsFooterOpen] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [groups, setGroups] = useState([]);
+
   const navigate = useNavigate();
 
   const toggleFooter = () => setIsFooterOpen((prev) => !prev);
@@ -118,6 +123,22 @@ const ContactSidebar = ({ onSelectContact }) => {
 
 
     return () => unsubContacts();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (!user) return;
+
+      const ref = collection(db, "groups");
+      const snap = await getDocs(ref);
+      const userGroups = snap.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((group) => group.members.includes(user.uid));
+
+      setGroups(userGroups);
+    };
+
+    fetchGroups();
   }, [user]);
 
   // 🔄 Atualizar contador de não lidas por conversa
@@ -225,6 +246,19 @@ const ContactSidebar = ({ onSelectContact }) => {
             </ContactItem>
           );
         })}
+
+        {groups.length > 0 && (
+          <>
+            <SectionTitle>Grupos</SectionTitle>
+            {groups.map((g) => (
+              <ContactItem key={g.id} onClick={() =>
+                onSelectContact({ ...g, isGroup: true })}>
+                <img src={g.imageURL || "/group.png"} alt="grupo" />
+                <span>{g.name}</span>
+              </ContactItem>
+            ))}
+          </>
+        )}
       </ScrollArea>
 
       <Footer $isOpen={isFooterOpen}>
@@ -245,15 +279,22 @@ const ContactSidebar = ({ onSelectContact }) => {
               <FiUser />
               Perfil
             </NavButton>
+
           </NavRow>
 
+
           <NavRow>
+            <NavButton onClick={() => setShowGroupModal(true)}>
+              <FiUsers />
+              Grupo
+            </NavButton>
             <NavButton onClick={logout}>
               <FiLogOut />
               Sair
             </NavButton>
-            <ThemeToggle />
+
           </NavRow>
+          <ThemeToggle />
         </div>
 
         <FooterBottom>
@@ -268,6 +309,11 @@ const ContactSidebar = ({ onSelectContact }) => {
       </Footer>
 
       <AddContactModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <CreateGroupModal
+        isOpen={showGroupModal}
+        onClose={() => setShowGroupModal(false)}
+      />
+
     </Container>
   );
 };
