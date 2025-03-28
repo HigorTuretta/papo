@@ -38,6 +38,7 @@ import messageSendSound from '../../assets/messageSend.mp3'
 import messageRecieveSound from '../../assets/messageRecieve.mp3'
 import { onValue, ref as rtdbRef } from "firebase/database";
 import { rtdb } from "../../services/firebase";
+import NotificationBanner from "../NotificationBanner";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -246,6 +247,7 @@ const ChatWindow = ({ contact }) => {
 
   return (
     <Container>
+     
       <Header>
         <ContactAvatar src={contactData.photoURL || "/profile.jpeg"} />
         <ContactInfo>
@@ -260,8 +262,9 @@ const ChatWindow = ({ contact }) => {
                   : ""}
           </span>
         </ContactInfo>
+        
       </Header>
-
+      <NotificationBanner />
       <Messages ref={messagesRef} $themeName={themeName}>
         <SeparatorWrapper>
           <DateSeparator>
